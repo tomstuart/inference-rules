@@ -41,15 +41,19 @@ class Formula
   end
 end
 
+def form(*args)
+  Formula.new(args)
+end
+
 t₁, t₂, t₃, t₁′ = %i(t₁ t₂ t₃ t₁′).map(&Variable.method(:new))
-if_true = Formula.new([:if, :true, :then, t₂, :else, t₃, :→, t₂])
-if_false = Formula.new([:if, :false, :then, t₂, :else, t₃, :→, t₃])
+if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
+if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
 
 expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
 expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
 
-premise = Formula.new([t₁, :→, t₁′])
-conclusion = Formula.new([:if, t₁, :then, t₂, :else, t₃, :→, :if, t₁′, :then, t₂, :else, t₃])
+premise = form(t₁, :→, t₁′)
+conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
 
 expect(premise).to look_like 't₁ → t₁′'
 expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
@@ -100,7 +104,7 @@ expect(state.value_of(t₁)).to eq :false
 
 result = Variable.new(:result)
 
-term = Formula.new([:if, :true, :then, :false, :else, :true, :→, result])
+term = form(form(:if, :true, :then, :false, :else, :true), :→, result)
 state = State.new.unify(term, if_true)
 expect(state.value_of(t₂)).to eq :false
 expect(state.value_of(t₃)).to eq :true
@@ -108,7 +112,7 @@ expect(state.value_of(result)).to eq :false
 state = State.new.unify(term, if_false)
 expect(state).to be_nil
 
-term = Formula.new([:if, :false, :then, :false, :else, :true, :→, result])
+term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
 state = State.new.unify(term, if_true)
 expect(state).to be_nil
 state = State.new.unify(term, if_false)
