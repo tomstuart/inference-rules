@@ -75,6 +75,8 @@ class State
   def value_of(key)
     if values.has_key?(key)
       value_of values.fetch(key)
+    elsif key.is_a?(Formula)
+      Formula.new(key.parts.map(&method(:value_of)))
     else
       key
     end
@@ -172,6 +174,6 @@ scope do |t₁, t₂, t₃, t₁′|
     rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
     expect(rule).to eq rules[2]
     state = state.unify(term, rule.conclusion)
-    expect(state.value_of(result)).to eq form(:if, t₁′, :then, t₂, :else, t₃)
+    expect(state.value_of(result)).to eq form(:if, t₁′, :then, :false, :else, :true)
   end
 end
