@@ -27,14 +27,8 @@ class Variable
   end
 end
 
-class Formula
+class Formula < Struct.new(:parts)
   include Atom
-
-  def initialize(parts)
-    @parts = parts
-  end
-
-  attr_reader :parts
 
   def to_s
     parts.map(&:to_s).join(' ')
