@@ -114,26 +114,26 @@ end
 scope do |t₂, t₃, result|
   if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
   if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
-  term = form(form(:if, :true, :then, :false, :else, :true), :→, result)
+  formula = form(form(:if, :true, :then, :false, :else, :true), :→, result)
 
-  state = State.new.unify(term, if_true)
+  state = State.new.unify(formula, if_true)
   expect(state.value_of(t₂)).to eq :false
   expect(state.value_of(t₃)).to eq :true
   expect(state.value_of(result)).to eq :false
 
-  state = State.new.unify(term, if_false)
+  state = State.new.unify(formula, if_false)
   expect(state).to be_nil
 end
 
 scope do |t₂, t₃, result|
   if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
   if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
-  term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
 
-  state = State.new.unify(term, if_true)
+  state = State.new.unify(formula, if_true)
   expect(state).to be_nil
 
-  state = State.new.unify(term, if_false)
+  state = State.new.unify(formula, if_false)
   expect(state.value_of(t₂)).to eq :false
   expect(state.value_of(t₃)).to eq :true
   expect(state.value_of(result)).to eq :true
@@ -160,29 +160,29 @@ scope do |t₁, t₂, t₃, t₁′|
   ]
 
   scope do |result|
-    term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+    formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
     state = State.new
-    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
     expect(rule).to eq rules[1]
-    state = state.unify(term, rule.conclusion)
+    state = state.unify(formula, rule.conclusion)
     expect(state.value_of(result)).to eq :true
   end
 
   scope do |result|
-    term = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
+    formula = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
     state = State.new
 
-    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
     expect(rule).to eq rules[2]
-    state = state.unify(term, rule.conclusion)
+    state = state.unify(formula, rule.conclusion)
     expect(state.value_of(result)).to eq form(:if, t₁′, :then, :false, :else, :true)
 
     expect(rule.premises.length).to eq 1
-    term = rule.premises.first
+    formula = rule.premises.first
 
-    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
     expect(rule).to eq rules[0]
-    state = state.unify(term, rule.conclusion)
+    state = state.unify(formula, rule.conclusion)
     expect(state.value_of(result)).to eq form(:if, :false, :then, :false, :else, :true)
 
     expect(rule.premises.length).to eq 0
