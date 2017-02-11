@@ -27,6 +27,12 @@ class Variable
   end
 end
 
+def scope(&block)
+  names = block.parameters.map { |type, name| name }
+  variables = names.map(&Variable.method(:new))
+  block.call(*variables)
+end
+
 class Formula < Struct.new(:parts)
   include Atom
 
@@ -39,18 +45,21 @@ def form(*args)
   Formula.new(args)
 end
 
-t₁, t₂, t₃, t₁′ = %i(t₁ t₂ t₃ t₁′).map(&Variable.method(:new))
-if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
-if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
+scope do |t₂, t₃|
+  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
+  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
 
-expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
-expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
+  expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
+  expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
+end
 
-premise = form(t₁, :→, t₁′)
-conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
+scope do |t₁, t₂, t₃, t₁′|
+  premise = form(t₁, :→, t₁′)
+  conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
 
-expect(premise).to look_like 't₁ → t₁′'
-expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
+  expect(premise).to look_like 't₁ → t₁′'
+  expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
+end
 
 class State
   def initialize(values = {})
@@ -90,29 +99,43 @@ class State
   end
 end
 
-state = State.new.unify(t₁, :true)
-expect(state.value_of(t₁)).to eq :true
+scope do |t₁|
+  state = State.new.unify(t₁, :true)
+  expect(state.value_of(t₁)).to eq :true
+end
 
-state = State.new.unify(t₂, :false).unify(t₂, t₁)
-expect(state.value_of(t₁)).to eq :false
+scope do |t₁, t₂|
+  state = State.new.unify(t₂, :false).unify(t₂, t₁)
+  expect(state.value_of(t₁)).to eq :false
+end
 
-result = Variable.new(:result)
+scope do |t₂, t₃, result|
+  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
+  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
+  term = form(form(:if, :true, :then, :false, :else, :true), :→, result)
 
-term = form(form(:if, :true, :then, :false, :else, :true), :→, result)
-state = State.new.unify(term, if_true)
-expect(state.value_of(t₂)).to eq :false
-expect(state.value_of(t₃)).to eq :true
-expect(state.value_of(result)).to eq :false
-state = State.new.unify(term, if_false)
-expect(state).to be_nil
+  state = State.new.unify(term, if_true)
+  expect(state.value_of(t₂)).to eq :false
+  expect(state.value_of(t₃)).to eq :true
+  expect(state.value_of(result)).to eq :false
 
-term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
-state = State.new.unify(term, if_true)
-expect(state).to be_nil
-state = State.new.unify(term, if_false)
-expect(state.value_of(t₂)).to eq :false
-expect(state.value_of(t₃)).to eq :true
-expect(state.value_of(result)).to eq :true
+  state = State.new.unify(term, if_false)
+  expect(state).to be_nil
+end
+
+scope do |t₂, t₃, result|
+  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
+  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
+  term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+
+  state = State.new.unify(term, if_true)
+  expect(state).to be_nil
+
+  state = State.new.unify(term, if_false)
+  expect(state.value_of(t₂)).to eq :false
+  expect(state.value_of(t₃)).to eq :true
+  expect(state.value_of(result)).to eq :true
+end
 
 class Rule
   def initialize(premises, conclusion)
@@ -122,22 +145,33 @@ class Rule
   attr_reader :premises, :conclusion
 end
 
-rules = [
-  Rule.new([], if_true),
-  Rule.new([], if_false),
-  Rule.new([premise], conclusion)
-]
+scope do |t₁, t₂, t₃, t₁′|
+  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
+  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
+  premise = form(t₁, :→, t₁′)
+  conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
 
-term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
-state = State.new
-rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
-expect(rule).to eq rules[1]
-state = state.unify(term, rule.conclusion)
-expect(state.value_of(result)).to eq :true
+  rules = [
+    Rule.new([], if_true),
+    Rule.new([], if_false),
+    Rule.new([premise], conclusion)
+  ]
 
-term = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
-state = State.new
-rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
-expect(rule).to eq rules[2]
-state = state.unify(term, rule.conclusion)
-expect(state.value_of(result)).to eq form(:if, t₁′, :then, t₂, :else, t₃)
+  scope do |result|
+    term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+    state = State.new
+    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    expect(rule).to eq rules[1]
+    state = state.unify(term, rule.conclusion)
+    expect(state.value_of(result)).to eq :true
+  end
+
+  scope do |result|
+    term = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
+    state = State.new
+    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    expect(rule).to eq rules[2]
+    state = state.unify(term, rule.conclusion)
+    expect(state.value_of(result)).to eq form(:if, t₁′, :then, t₂, :else, t₃)
+  end
+end
