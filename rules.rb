@@ -171,9 +171,20 @@ scope do |t₁, t₂, t₃, t₁′|
   scope do |result|
     term = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
     state = State.new
+
     rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
     expect(rule).to eq rules[2]
     state = state.unify(term, rule.conclusion)
     expect(state.value_of(result)).to eq form(:if, t₁′, :then, :false, :else, :true)
+
+    expect(rule.premises.length).to eq 1
+    term = rule.premises.first
+
+    rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+    expect(rule).to eq rules[0]
+    state = state.unify(term, rule.conclusion)
+    expect(state.value_of(result)).to eq form(:if, :false, :then, :false, :else, :true)
+
+    expect(rule.premises.length).to eq 0
   end
 end
