@@ -163,7 +163,7 @@ scope do |result|
 end
 
 scope do |result|
-  formula = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
+  formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
   state = State.new
 
   rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
@@ -177,7 +177,7 @@ scope do |result|
   rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
   expect(rule).to eq rules[0]
   state = state.unify(formula, rule.conclusion)
-  expect(state.value_of(result)).to look_like 'if false then false else true'
+  expect(state.value_of(result)).to look_like 'if true then false else true'
 
   expect(rule.premises.length).to eq 0
 end
