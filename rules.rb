@@ -113,3 +113,31 @@ state = State.new.unify(term, if_false)
 expect(state.value_of(t₂)).to eq :false
 expect(state.value_of(t₃)).to eq :true
 expect(state.value_of(result)).to eq :true
+
+class Rule
+  def initialize(premises, conclusion)
+    @premises, @conclusion = premises, conclusion
+  end
+
+  attr_reader :premises, :conclusion
+end
+
+rules = [
+  Rule.new([], if_true),
+  Rule.new([], if_false),
+  Rule.new([premise], conclusion)
+]
+
+term = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+state = State.new
+rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+expect(rule).to eq rules[1]
+state = state.unify(term, rule.conclusion)
+expect(state.value_of(result)).to eq :true
+
+term = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
+state = State.new
+rule = rules.detect { |r| state.unify(term, r.conclusion) != nil }
+expect(rule).to eq rules[2]
+state = state.unify(term, rule.conclusion)
+expect(state.value_of(result)).to eq form(:if, t₁′, :then, t₂, :else, t₃)
