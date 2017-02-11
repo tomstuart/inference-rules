@@ -147,44 +147,37 @@ class Rule
   attr_reader :premises, :conclusion
 end
 
-scope do |t₁, t₂, t₃, t₁′|
-  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
-  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
-  premise = form(t₁, :→, t₁′)
-  conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
+rules = [
+  scope { |t₂, t₃| Rule.new([], form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)) },
+  scope { |t₂, t₃| Rule.new([], form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)) },
+  scope { |t₁, t₂, t₃, t₁′| Rule.new([form(t₁, :→, t₁′)], form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))) }
+]
 
-  rules = [
-    Rule.new([], if_true),
-    Rule.new([], if_false),
-    Rule.new([premise], conclusion)
-  ]
+scope do |result|
+  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  state = State.new
+  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  expect(rule).to eq rules[1]
+  state = state.unify(formula, rule.conclusion)
+  expect(state.value_of(result)).to eq :true
+end
 
-  scope do |result|
-    formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
-    state = State.new
-    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
-    expect(rule).to eq rules[1]
-    state = state.unify(formula, rule.conclusion)
-    expect(state.value_of(result)).to eq :true
-  end
+scope do |result|
+  formula = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
+  state = State.new
 
-  scope do |result|
-    formula = form(form(:if, form(:if, :true, :then, :false, :else, :true), :then, :false, :else, :true), :→, result)
-    state = State.new
+  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  expect(rule).to eq rules[2]
+  state = state.unify(formula, rule.conclusion)
+  expect(state.value_of(result)).to look_like 'if t₁′ then false else true'
 
-    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
-    expect(rule).to eq rules[2]
-    state = state.unify(formula, rule.conclusion)
-    expect(state.value_of(result)).to eq form(:if, t₁′, :then, :false, :else, :true)
+  expect(rule.premises.length).to eq 1
+  formula = rule.premises.first
 
-    expect(rule.premises.length).to eq 1
-    formula = rule.premises.first
+  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  expect(rule).to eq rules[0]
+  state = state.unify(formula, rule.conclusion)
+  expect(state.value_of(result)).to look_like 'if false then false else true'
 
-    rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
-    expect(rule).to eq rules[0]
-    state = state.unify(formula, rule.conclusion)
-    expect(state.value_of(result)).to eq form(:if, :false, :then, :false, :else, :true)
-
-    expect(rule.premises.length).to eq 0
-  end
+  expect(rule.premises.length).to eq 0
 end
