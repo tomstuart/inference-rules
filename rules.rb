@@ -387,14 +387,14 @@ NoRuleApplies = Class.new(StandardError)
 Nondeterministic = Class.new(StandardError)
 
 def eval1(rules, term)
-  scope do |result|
-    states = derive(rules, evaluates(term, result), State.new)
+  result = Builder.new.build_variable('result')
+  formula = Builder.new.build_evaluates(term, result)
+  states = derive(rules, formula, State.new)
 
-    raise NoRuleApplies if states.empty?
-    raise Nondeterministic if states.length > 1
+  raise NoRuleApplies if states.empty?
+  raise Nondeterministic if states.length > 1
 
-    states.first.value_of(result)
-  end
+  states.first.value_of(result)
 end
 
 RSpec::Matchers.define :reduce_to do |expected|
