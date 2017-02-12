@@ -28,8 +28,9 @@ class Variable
 end
 
 def scope(&block)
+  builder = Builder.new
   names = block.parameters.map { |type, name| name }
-  variables = names.map(&Variable.method(:new))
+  variables = names.map(&builder.method(:build_variable))
   block.call(*variables)
 end
 
@@ -41,7 +42,33 @@ class Formula < Struct.new(:parts)
   end
 end
 
+class Builder
+  def build_true
+    :true
+  end
+
+  def build_false
+    :false
+  end
+
+  def build_conditional(condition, consequent, alternative)
+    Formula.new([:if, condition, :then, consequent, :else, alternative])
+  end
+
+  def build_evaluates(before, after)
+    Formula.new([before, :→, after])
+  end
+
+  def build_variable(name)
+    Variable.new(name)
+  end
+end
+
 class Parser
+  def initialize(builder)
+    @builder = builder
+  end
+
   def parse(string)
     self.string = string
     parse_everything
@@ -49,7 +76,7 @@ class Parser
 
   private
 
-  attr_reader :string
+  attr_reader :builder, :string
 
   def string=(string)
     @string = string.strip
@@ -79,15 +106,15 @@ class Parser
     read %r{else}
     alternative = parse_term
 
-    Formula.new([:if, condition, :then, consequent, :else, alternative])
+    builder.build_conditional(condition, consequent, alternative)
   end
 
   def parse_boolean
     case read_boolean
     when 'true'
-      :true
+      builder.build_true
     when 'false'
-      :false
+      builder.build_false
     else
       complain
     end
@@ -120,28 +147,40 @@ class Parser
 end
 
 def parse_term(string)
-  Parser.new.parse(string)
+  Parser.new(Builder.new).parse(string)
 end
 
-def form(*args)
-  Formula.new(args)
+def yes(*args)
+  Builder.new.build_true(*args)
 end
 
-expect(parse_term('true')).to eq :true
-expect(parse_term('if false then false else true')).to eq form(:if, :false, :then, :false, :else, :true)
-expect(parse_term('if if true then true else false then false else true')).to eq form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true)
+def no(*args)
+  Builder.new.build_false(*args)
+end
+
+def conditional(*args)
+  Builder.new.build_conditional(*args)
+end
+
+def evaluates(*args)
+  Builder.new.build_evaluates(*args)
+end
+
+expect(parse_term('true')).to eq yes
+expect(parse_term('if false then false else true')).to eq conditional(no, no, yes)
+expect(parse_term('if if true then true else false then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
 scope do |t₂, t₃|
-  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
-  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
+  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
+  if_false = evaluates(conditional(no, t₂, t₃), t₃)
 
   expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
   expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
 end
 
 scope do |t₁, t₂, t₃, t₁′|
-  premise = form(t₁, :→, t₁′)
-  conclusion = form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))
+  premise = evaluates(t₁, t₁′)
+  conclusion = evaluates(conditional(t₁, t₂, t₃), conditional(t₁′, t₂, t₃))
 
   expect(premise).to look_like 't₁ → t₁′'
   expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
@@ -188,41 +227,41 @@ class State
 end
 
 scope do |t₁|
-  state = State.new.unify(t₁, :true)
-  expect(state.value_of(t₁)).to eq :true
+  state = State.new.unify(t₁, yes)
+  expect(state.value_of(t₁)).to eq yes
 end
 
 scope do |t₁, t₂|
-  state = State.new.unify(t₂, :false).unify(t₂, t₁)
-  expect(state.value_of(t₁)).to eq :false
+  state = State.new.unify(t₂, no).unify(t₂, t₁)
+  expect(state.value_of(t₁)).to eq no
 end
 
 scope do |t₂, t₃, result|
-  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
-  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
-  formula = form(form(:if, :true, :then, :false, :else, :true), :→, result)
+  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
+  if_false = evaluates(conditional(no, t₂, t₃), t₃)
+  formula = evaluates(conditional(yes, no, yes), result)
 
   state = State.new.unify(formula, if_true)
-  expect(state.value_of(t₂)).to eq :false
-  expect(state.value_of(t₃)).to eq :true
-  expect(state.value_of(result)).to eq :false
+  expect(state.value_of(t₂)).to eq no
+  expect(state.value_of(t₃)).to eq yes
+  expect(state.value_of(result)).to eq no
 
   state = State.new.unify(formula, if_false)
   expect(state).to be_nil
 end
 
 scope do |t₂, t₃, result|
-  if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
-  if_false = form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)
-  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
+  if_false = evaluates(conditional(no, t₂, t₃), t₃)
+  formula = evaluates(conditional(no, no, yes), result)
 
   state = State.new.unify(formula, if_true)
   expect(state).to be_nil
 
   state = State.new.unify(formula, if_false)
-  expect(state.value_of(t₂)).to eq :false
-  expect(state.value_of(t₃)).to eq :true
-  expect(state.value_of(result)).to eq :true
+  expect(state.value_of(t₂)).to eq no
+  expect(state.value_of(t₃)).to eq yes
+  expect(state.value_of(result)).to eq yes
 end
 
 class Rule
@@ -253,9 +292,9 @@ class Rule
 end
 
 rules = [
-  scope { |t₂, t₃| Rule.new([], form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)) },
-  scope { |t₂, t₃| Rule.new([], form(form(:if, :false, :then, t₂, :else, t₃), :→, t₃)) },
-  scope { |t₁, t₂, t₃, t₁′| Rule.new([form(t₁, :→, t₁′)], form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))) }
+  scope { |t₂, t₃| Rule.new([], evaluates(conditional(yes, t₂, t₃), t₂)) },
+  scope { |t₂, t₃| Rule.new([], evaluates(conditional(no, t₂, t₃), t₃)) },
+  scope { |t₁, t₂, t₃, t₁′| Rule.new([evaluates(t₁, t₁′)], evaluates(conditional(t₁, t₂, t₃), conditional(t₁′, t₂, t₃))) }
 ]
 
 def match_rules(rules, formula, state)
@@ -265,15 +304,15 @@ def match_rules(rules, formula, state)
 end
 
 scope do |result|
-  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  formula = evaluates(conditional(no, no, yes), result)
   state = State.new
   matches = match_rules(rules, formula, state)
   rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
-  expect(state.value_of(result)).to eq :true
+  expect(state.value_of(result)).to eq yes
 end
 
 scope do |result|
-  formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
+  formula = evaluates(conditional(conditional(yes, yes, no), no, yes), result)
   state = State.new
 
   matches = match_rules(rules, formula, state)
@@ -299,21 +338,21 @@ def derive(rules, formula, state)
 end
 
 scope do |result|
-  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  formula = evaluates(conditional(no, no, yes), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
-  expect(state.value_of(result)).to eq :true
+  expect(state.value_of(result)).to eq yes
 end
 
 scope do |result|
-  formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
+  formula = evaluates(conditional(conditional(yes, yes, no), no, yes), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
   expect(state.value_of(result)).to look_like 'if true then false else true'
 
-  formula = form(state.value_of(result), :→, result)
+  formula = evaluates(state.value_of(result), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
@@ -325,7 +364,7 @@ Nondeterministic = Class.new(StandardError)
 
 def eval1(rules, term)
   scope do |result|
-    states = derive(rules, form(term, :→, result), State.new)
+    states = derive(rules, evaluates(term, result), State.new)
 
     raise NoRuleApplies if states.empty?
     raise Nondeterministic if states.length > 1
