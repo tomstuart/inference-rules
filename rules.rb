@@ -27,13 +27,6 @@ class Variable
   end
 end
 
-def scope(&block)
-  builder = Builder.new
-  names = block.parameters.map { |type, name| name }
-  variables = names.map(&builder.method(:build_variable))
-  block.call(*variables)
-end
-
 class Formula < Struct.new(:parts)
   include Atom
 
