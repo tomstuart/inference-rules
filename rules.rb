@@ -185,6 +185,14 @@ def parse_formula(string)
   Parser.new(Builder.new).parse_complete_formula(string)
 end
 
+def parse_rule(premise_strings, conclusion_string)
+  builder = Builder.new
+  premises = premise_strings.map { |string| Parser.new(builder).parse_complete_formula(string) }
+  conclusion = Parser.new(builder).parse_complete_formula(conclusion_string)
+
+  Rule.new(premises, conclusion)
+end
+
 def yes(*args)
   Builder.new.build_true(*args)
 end
@@ -321,9 +329,9 @@ class Rule
 end
 
 rules = [
-  scope { |t₂, t₃| Rule.new([], parse_formula('if true then t₂ else t₃ → t₂')) },
-  scope { |t₂, t₃| Rule.new([], parse_formula('if false then t₂ else t₃ → t₃')) },
-  scope { |t₁, t₂, t₃, t₁′| Rule.new([evaluates(t₁, t₁′)], evaluates(conditional(t₁, t₂, t₃), conditional(t₁′, t₂, t₃))) }
+  scope { |t₂, t₃| parse_rule([], 'if true then t₂ else t₃ → t₂') },
+  scope { |t₂, t₃| parse_rule([], 'if false then t₂ else t₃ → t₃') },
+  scope { |t₁, t₂, t₃, t₁′| parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
 ]
 
 def match_rules(rules, formula, state)
