@@ -164,12 +164,20 @@ rules = [
   scope { |t₁, t₂, t₃, t₁′| Rule.new([form(t₁, :→, t₁′)], form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))) }
 ]
 
+def match_rule(rules, formula, state)
+  matching_rules = rules.select { |r| state.unify(formula, r.conclusion) != nil }
+
+  puts "warning: #{matching_rules.length} matching rules…\n\n#{matching_rules.map(&:to_s).join("\n\n")}\n\n…so picking first" if matching_rules.length > 1
+  rule = matching_rules.first
+
+  [rule, state.unify(formula, rule.conclusion)]
+end
+
 scope do |result|
   formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
   state = State.new
-  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  rule, state = match_rule(rules, formula, state)
   expect(rule).to eq rules[1]
-  state = state.unify(formula, rule.conclusion)
   expect(state.value_of(result)).to eq :true
 end
 
@@ -177,17 +185,15 @@ scope do |result|
   formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
   state = State.new
 
-  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  rule, state = match_rule(rules, formula, state)
   expect(rule).to eq rules[2]
-  state = state.unify(formula, rule.conclusion)
   expect(state.value_of(result)).to look_like 'if t₁′ then false else true'
 
   expect(rule.premises.length).to eq 1
   formula = rule.premises.first
 
-  rule = rules.detect { |r| state.unify(formula, r.conclusion) != nil }
+  rule, state = match_rule(rules, formula, state)
   expect(rule).to eq rules[0]
-  state = state.unify(formula, rule.conclusion)
   expect(state.value_of(result)).to look_like 'if true then false else true'
 
   expect(rule.premises.length).to eq 0
