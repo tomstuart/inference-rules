@@ -334,15 +334,16 @@ def eval1(rules, term)
   end
 end
 
-term = form(:if, :false, :then, :false, :else, :true)
-term = eval1(rules, term)
-expect(term).to eq :true
+RSpec::Matchers.define :reduce_to do |expected|
+  match do |actual|
+    eval1(rules, parse_term(actual)) == parse_term(expected)
+  end
+end
 
-term = form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true)
-term = eval1(rules, term)
-expect(term).to eq form(:if, :true, :then, :false, :else, :true)
-term = eval1(rules, term)
-expect(term).to eq :false
+expect('if false then false else true').to reduce_to 'true'
+
+expect('if if true then true else false then false else true').to reduce_to 'if true then false else true'
+expect('if true then false else true').to reduce_to 'false'
 
 def eval(rules, term)
   begin
@@ -352,5 +353,11 @@ def eval(rules, term)
   end
 end
 
-expect(eval(rules, form(:if, :false, :then, :false, :else, :true))).to eq :true
-expect(eval(rules, form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true))).to eq :false
+RSpec::Matchers.define :evaluate_to do |expected|
+  match do |actual|
+    eval(rules, parse_term(actual)) == parse_term(expected)
+  end
+end
+
+expect('if false then false else true').to evaluate_to 'true'
+expect('if if true then true else false then false else true').to evaluate_to 'false'
