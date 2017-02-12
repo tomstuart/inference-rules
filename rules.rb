@@ -43,6 +43,10 @@ class Formula < Struct.new(:parts)
 end
 
 class Builder
+  def initialize
+    self.variables = Hash.new { |vars, name| vars[name] = Variable.new(name) }
+  end
+
   def build_true
     :true
   end
@@ -60,8 +64,12 @@ class Builder
   end
 
   def build_variable(name)
-    Variable.new(name)
+    variables[name]
   end
+
+  private
+
+  attr_accessor :variables
 end
 
 class Parser
@@ -313,8 +321,8 @@ class Rule
 end
 
 rules = [
-  scope { |t₂, t₃| Rule.new([], evaluates(conditional(yes, t₂, t₃), t₂)) },
-  scope { |t₂, t₃| Rule.new([], evaluates(conditional(no, t₂, t₃), t₃)) },
+  scope { |t₂, t₃| Rule.new([], parse_formula('if true then t₂ else t₃ → t₂')) },
+  scope { |t₂, t₃| Rule.new([], parse_formula('if false then t₂ else t₃ → t₃')) },
   scope { |t₁, t₂, t₃, t₁′| Rule.new([evaluates(t₁, t₁′)], evaluates(conditional(t₁, t₂, t₃), conditional(t₁′, t₂, t₃))) }
 ]
 
