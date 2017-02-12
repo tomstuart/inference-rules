@@ -213,15 +213,11 @@ expect(parse_term('true')).to eq yes
 expect(parse_term('if false then false else true')).to eq conditional(no, no, yes)
 expect(parse_term('if if true then true else false then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
-scope do |t₂, t₃|
-  expect(parse_formula('if true then t₂ else t₃ → t₂')).to look_like 'if true then t₂ else t₃ → t₂'
-  expect(parse_formula('if false then t₂ else t₃ → t₃')).to look_like 'if false then t₂ else t₃ → t₃'
-end
+expect(parse_formula('if true then t₂ else t₃ → t₂')).to look_like 'if true then t₂ else t₃ → t₂'
+expect(parse_formula('if false then t₂ else t₃ → t₃')).to look_like 'if false then t₂ else t₃ → t₃'
 
-scope do |t₁, t₂, t₃, t₁′|
-  expect(parse_formula('t₁ → t₁′')).to look_like 't₁ → t₁′'
-  expect(parse_formula('if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
-end
+expect(parse_formula('t₁ → t₁′')).to look_like 't₁ → t₁′'
+expect(parse_formula('if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
 
 class State
   def initialize(values = {})
@@ -329,9 +325,9 @@ class Rule
 end
 
 rules = [
-  scope { |t₂, t₃| parse_rule([], 'if true then t₂ else t₃ → t₂') },
-  scope { |t₂, t₃| parse_rule([], 'if false then t₂ else t₃ → t₃') },
-  scope { |t₁, t₂, t₃, t₁′| parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
+  parse_rule([], 'if true then t₂ else t₃ → t₂'),
+  parse_rule([], 'if false then t₂ else t₃ → t₃'),
+  parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')
 ]
 
 def match_rules(rules, formula, state)
