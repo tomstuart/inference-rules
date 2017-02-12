@@ -233,3 +233,23 @@ scope do |result|
   state = states.first
   expect(state.value_of(result)).to look_like 'false'
 end
+
+Nondeterministic = Class.new(StandardError)
+
+def eval1(rules, term)
+  scope do |result|
+    states = derive(rules, form(term, :→, result), State.new)
+    raise Nondeterministic if states.length > 1
+    states.first.value_of(result)
+  end
+end
+
+term = form(:if, :false, :then, :false, :else, :true)
+term = eval1(rules, term)
+expect(term).to eq :true
+
+term = form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true)
+term = eval1(rules, term)
+expect(term).to eq form(:if, :true, :then, :false, :else, :true)
+term = eval1(rules, term)
+expect(term).to eq :false
