@@ -156,6 +156,14 @@ class Rule
       conclusion_string
     ].compact.join("\n")
   end
+
+  def match(formula, state)
+    state.unify(formula, conclusion)
+  end
+
+  def matches?(*args)
+    !match(*args).nil?
+  end
 end
 
 rules = [
@@ -165,12 +173,12 @@ rules = [
 ]
 
 def match_rule(rules, formula, state)
-  matching_rules = rules.select { |r| state.unify(formula, r.conclusion) != nil }
+  matching_rules = rules.select { |rule| rule.matches?(formula, state) }
 
   puts "warning: #{matching_rules.length} matching rules…\n\n#{matching_rules.map(&:to_s).join("\n\n")}\n\n…so picking first" if matching_rules.length > 1
   rule = matching_rules.first
 
-  [rule, state.unify(formula, rule.conclusion)]
+  [rule, rule.match(formula, state)]
 end
 
 scope do |result|
