@@ -172,20 +172,17 @@ rules = [
   scope { |t₁, t₂, t₃, t₁′| Rule.new([form(t₁, :→, t₁′)], form(form(:if, t₁, :then, t₂, :else, t₃), :→, form(:if, t₁′, :then, t₂, :else, t₃))) }
 ]
 
-def match_rule(rules, formula, state)
-  matching_rules = rules.select { |rule| rule.matches?(formula, state) }
-
-  puts "warning: #{matching_rules.length} matching rules…\n\n#{matching_rules.map(&:to_s).join("\n\n")}\n\n…so picking first" if matching_rules.length > 1
-  rule = matching_rules.first
-
-  [rule, rule.match(formula, state)]
+def match_rules(rules, formula, state)
+  rules.
+    select { |rule| rule.matches?(formula, state) }.
+    map { |rule| [rule, rule.match(formula, state)] }
 end
 
 scope do |result|
   formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
   state = State.new
-  rule, state = match_rule(rules, formula, state)
-  expect(rule).to eq rules[1]
+  matches = match_rules(rules, formula, state)
+  rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
   expect(state.value_of(result)).to eq :true
 end
 
@@ -193,37 +190,46 @@ scope do |result|
   formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
   state = State.new
 
-  rule, state = match_rule(rules, formula, state)
-  expect(rule).to eq rules[2]
+  matches = match_rules(rules, formula, state)
+  rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
   expect(state.value_of(result)).to look_like 'if t₁′ then false else true'
 
   expect(rule.premises.length).to eq 1
   formula = rule.premises.first
 
-  rule, state = match_rule(rules, formula, state)
-  expect(rule).to eq rules[0]
+  matches = match_rules(rules, formula, state)
+  rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if true then' }
   expect(state.value_of(result)).to look_like 'if true then false else true'
 
   expect(rule.premises.length).to eq 0
 end
 
 def derive(rules, formula, state)
-  rule, state = match_rule(rules, formula, state)
-  rule.premises.inject(state) { |state, premise| derive(rules, premise, state) }
+  match_rules(rules, formula, state).flat_map { |rule, state|
+    rule.premises.inject([state]) { |states, premise|
+      states.flat_map { |state| derive(rules, premise, state) }
+    }
+  }.compact
 end
 
 scope do |result|
   formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
-  state = derive(rules, formula, State.new)
+  states = derive(rules, formula, State.new)
+  expect(states.length).to eq 1
+  state = states.first
   expect(state.value_of(result)).to eq :true
 end
 
 scope do |result|
   formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
-  state = derive(rules, formula, State.new)
+  states = derive(rules, formula, State.new)
+  expect(states.length).to eq 1
+  state = states.first
   expect(state.value_of(result)).to look_like 'if true then false else true'
 
   formula = form(state.value_of(result), :→, result)
-  state = derive(rules, formula, State.new)
+  states = derive(rules, formula, State.new)
+  expect(states.length).to eq 1
+  state = states.first
   expect(state.value_of(result)).to look_like 'false'
 end
