@@ -69,14 +69,14 @@ class Parser
     @builder = builder
   end
 
-  def parse(string)
+  def parse_complete_formula(string)
     self.string = string
-    parse_everything { parse_term }
+    parse_everything { parse_formula }
   end
 
-  def parse_formula(string)
+  def parse_complete_term(string)
     self.string = string
-    parse_everything { parse_evaluates }
+    parse_everything { parse_term }
   end
 
   private
@@ -93,7 +93,7 @@ class Parser
     result
   end
 
-  def parse_evaluates
+  def parse_formula
     before = parse_term
     read %r{→}
     after = parse_term
@@ -170,11 +170,11 @@ class Parser
 end
 
 def parse_term(string)
-  Parser.new(Builder.new).parse(string)
+  Parser.new(Builder.new).parse_complete_term(string)
 end
 
 def parse_formula(string)
-  Parser.new(Builder.new).parse_formula(string)
+  Parser.new(Builder.new).parse_complete_formula(string)
 end
 
 def yes(*args)
