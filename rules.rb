@@ -198,3 +198,24 @@ scope do |result|
 
   expect(rule.premises.length).to eq 0
 end
+
+def derive(rules, formula, state)
+  rule, state = match_rule(rules, formula, state)
+  rule.premises.inject(state) { |state, premise| derive(rules, premise, state) }
+end
+
+scope do |result|
+  formula = form(form(:if, :false, :then, :false, :else, :true), :→, result)
+  state = derive(rules, formula, State.new)
+  expect(state.value_of(result)).to eq :true
+end
+
+scope do |result|
+  formula = form(form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true), :→, result)
+  state = derive(rules, formula, State.new)
+  expect(state.value_of(result)).to look_like 'if true then false else true'
+
+  formula = form(state.value_of(result), :→, result)
+  state = derive(rules, formula, State.new)
+  expect(state.value_of(result)).to look_like 'false'
+end
