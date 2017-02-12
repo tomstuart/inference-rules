@@ -322,13 +322,14 @@ class Rule
 end
 
 rules = [
-  parse_rule([], 'if true then t₂ else t₃ → t₂'),
-  parse_rule([], 'if false then t₂ else t₃ → t₃'),
-  parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')
+  -> { parse_rule([], 'if true then t₂ else t₃ → t₂') },
+  -> { parse_rule([], 'if false then t₂ else t₃ → t₃') },
+  -> { parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
 ]
 
 def match_rules(rules, formula, state)
   rules.
+    map(&:call).
     select { |rule| rule.matches?(formula, state) }.
     map { |rule| [rule, rule.match(formula, state)] }
 end
@@ -376,6 +377,22 @@ expect(states.length).to eq 1
 state = states.first
 expect(state.value_of(find_variable(formula, 'result'))).to look_like 'false'
 
+formula = parse_formula('if if if true then false else true then true else false then false else true → result')
+states = derive(rules, formula, State.new)
+expect(states.length).to eq 1
+state = states.first
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if if false then true else false then false else true'
+formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('result'))
+states = derive(rules, formula, State.new)
+expect(states.length).to eq 1
+state = states.first
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if false then false else true'
+formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('result'))
+states = derive(rules, formula, State.new)
+expect(states.length).to eq 1
+state = states.first
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
+
 NoRuleApplies = Class.new(StandardError)
 Nondeterministic = Class.new(StandardError)
 
@@ -401,6 +418,10 @@ expect('if false then false else true').to reduce_to 'true'
 expect('if if true then true else false then false else true').to reduce_to 'if true then false else true'
 expect('if true then false else true').to reduce_to 'false'
 
+expect('if if if true then false else true then true else false then false else true').to reduce_to 'if if false then true else false then false else true'
+expect('if if false then true else false then false else true').to reduce_to 'if false then false else true'
+expect('if false then false else true').to reduce_to 'true'
+
 def eval(rules, term)
   begin
     eval(rules, eval1(rules, term))
@@ -417,3 +438,4 @@ end
 
 expect('if false then false else true').to evaluate_to 'true'
 expect('if if true then true else false then false else true').to evaluate_to 'false'
+expect('if if if true then false else true then true else false then false else true').to evaluate_to 'true'
