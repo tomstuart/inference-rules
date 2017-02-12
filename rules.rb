@@ -259,42 +259,58 @@ class State
   end
 end
 
+def find_variable(formula, name)
+  case formula
+  when Variable
+    formula if formula.name == name
+  when Formula
+    formula.parts.each do |part|
+      result = find_variable(part, name)
+      return result if result
+    end
+    nil
+  end
+end
+
 scope do |t₁|
-  state = State.new.unify(t₁, yes)
-  expect(state.value_of(t₁)).to eq yes
+  term = parse_term('t₁')
+  state = State.new.unify(term, yes)
+  expect(state.value_of(find_variable(term, 't₁'))).to eq yes
 end
 
 scope do |t₁, t₂|
-  state = State.new.unify(t₂, no).unify(t₂, t₁)
-  expect(state.value_of(t₁)).to eq no
+  term₁ = parse_term('t₁')
+  term₂ = parse_term('t₂')
+  state = State.new.unify(term₂, no).unify(term₂, term₁)
+  expect(state.value_of(find_variable(term₁, 't₁'))).to eq no
 end
 
 scope do |t₂, t₃, result|
-  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
-  if_false = evaluates(conditional(no, t₂, t₃), t₃)
-  formula = evaluates(parse_term('if true then false else true'), result)
+  if_true = parse_formula('if true then t₂ else t₃ → t₂')
+  if_false = parse_formula('if false then t₂ else t₃ → t₃')
+  formula = parse_formula('if true then false else true → result')
 
   state = State.new.unify(formula, if_true)
-  expect(state.value_of(t₂)).to eq no
-  expect(state.value_of(t₃)).to eq yes
-  expect(state.value_of(result)).to eq no
+  expect(state.value_of(find_variable(if_true, 't₂'))).to eq no
+  expect(state.value_of(find_variable(if_true, 't₃'))).to eq yes
+  expect(state.value_of(find_variable(formula, 'result'))).to eq no
 
   state = State.new.unify(formula, if_false)
   expect(state).to be_nil
 end
 
 scope do |t₂, t₃, result|
-  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
-  if_false = evaluates(conditional(no, t₂, t₃), t₃)
-  formula = evaluates(parse_term('if false then false else true'), result)
+  if_true = parse_formula('if true then t₂ else t₃ → t₂')
+  if_false = parse_formula('if false then t₂ else t₃ → t₃')
+  formula = parse_formula('if false then false else true → result')
 
   state = State.new.unify(formula, if_true)
   expect(state).to be_nil
 
   state = State.new.unify(formula, if_false)
-  expect(state.value_of(t₂)).to eq no
-  expect(state.value_of(t₃)).to eq yes
-  expect(state.value_of(result)).to eq yes
+  expect(state.value_of(find_variable(if_false, 't₂'))).to eq no
+  expect(state.value_of(find_variable(if_false, 't₃'))).to eq yes
+  expect(state.value_of(find_variable(formula, 'result'))).to eq yes
 end
 
 class Rule
@@ -337,27 +353,27 @@ def match_rules(rules, formula, state)
 end
 
 scope do |result|
-  formula = evaluates(parse_term('if false then false else true'), result)
+  formula = parse_formula('if false then false else true → result')
   state = State.new
   matches = match_rules(rules, formula, state)
   rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
-  expect(state.value_of(result)).to eq yes
+  expect(state.value_of(find_variable(formula, 'result'))).to eq yes
 end
 
 scope do |result|
-  formula = evaluates(parse_term('if if true then true else false then false else true'), result)
+  formula = parse_formula('if if true then true else false then false else true → result')
   state = State.new
 
   matches = match_rules(rules, formula, state)
   rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
-  expect(state.value_of(result)).to look_like 'if t₁′ then false else true'
+  expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if t₁′ then false else true'
 
   expect(rule.premises.length).to eq 1
-  formula = rule.premises.first
+  premise = rule.premises.first
 
-  matches = match_rules(rules, formula, state)
+  matches = match_rules(rules, premise, state)
   rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if true then' }
-  expect(state.value_of(result)).to look_like 'if true then false else true'
+  expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
 
   expect(rule.premises.length).to eq 0
 end
@@ -371,21 +387,21 @@ def derive(rules, formula, state)
 end
 
 scope do |result|
-  formula = evaluates(parse_term('if false then false else true'), result)
+  formula = parse_formula('if false then false else true → result')
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
-  expect(state.value_of(result)).to eq yes
+  expect(state.value_of(find_variable(formula, 'result'))).to eq yes
 end
 
 scope do |result|
-  formula = evaluates(parse_term('if if true then true else false then false else true'), result)
+  formula = parse_formula('if if true then true else false then false else true → result')
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
-  expect(state.value_of(result)).to look_like 'if true then false else true'
+  expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
 
-  formula = evaluates(state.value_of(result), result)
+  formula = evaluates(state.value_of(find_variable(formula, 'result')), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
