@@ -93,6 +93,8 @@ class Parser
       parse_conditional
     elsif can_read? %r{true|false}
       parse_boolean
+    elsif can_read? %r{[\p{L}\p{N}]+\p{Po}*}
+      parse_variable
     else
       complain
     end
@@ -120,8 +122,16 @@ class Parser
     end
   end
 
+  def parse_variable
+    builder.build_variable(read_name)
+  end
+
   def read_boolean
     read %r{true|false}
+  end
+
+  def read_name
+    read %r{[\p{L}\p{N}]+\p{Po}*}
   end
 
   def can_read?(pattern)
@@ -171,16 +181,16 @@ expect(parse_term('if false then false else true')).to eq conditional(no, no, ye
 expect(parse_term('if if true then true else false then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
 scope do |t₂, t₃|
-  if_true = evaluates(conditional(yes, t₂, t₃), t₂)
-  if_false = evaluates(conditional(no, t₂, t₃), t₃)
+  if_true = evaluates(parse_term('if true then t₂ else t₃'), parse_term('t₂'))
+  if_false = evaluates(parse_term('if false then t₂ else t₃'), parse_term('t₃'))
 
   expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
   expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
 end
 
 scope do |t₁, t₂, t₃, t₁′|
-  premise = evaluates(t₁, t₁′)
-  conclusion = evaluates(conditional(t₁, t₂, t₃), conditional(t₁′, t₂, t₃))
+  premise = evaluates(parse_term('t₁'), parse_term('t₁′'))
+  conclusion = evaluates(parse_term('if t₁ then t₂ else t₃'), parse_term('if t₁′ then t₂ else t₃'))
 
   expect(premise).to look_like 't₁ → t₁′'
   expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
