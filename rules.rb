@@ -71,7 +71,12 @@ class Parser
 
   def parse(string)
     self.string = string
-    parse_everything
+    parse_everything { parse_term }
+  end
+
+  def parse_formula(string)
+    self.string = string
+    parse_everything { parse_evaluates }
   end
 
   private
@@ -83,9 +88,17 @@ class Parser
   end
 
   def parse_everything
-    result = parse_term
+    result = yield
     complain unless string.empty?
     result
+  end
+
+  def parse_evaluates
+    before = parse_term
+    read %r{→}
+    after = parse_term
+
+    builder.build_evaluates(before, after)
   end
 
   def parse_term
@@ -160,6 +173,10 @@ def parse_term(string)
   Parser.new(Builder.new).parse(string)
 end
 
+def parse_formula(string)
+  Parser.new(Builder.new).parse_formula(string)
+end
+
 def yes(*args)
   Builder.new.build_true(*args)
 end
@@ -181,19 +198,13 @@ expect(parse_term('if false then false else true')).to eq conditional(no, no, ye
 expect(parse_term('if if true then true else false then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
 scope do |t₂, t₃|
-  if_true = evaluates(parse_term('if true then t₂ else t₃'), parse_term('t₂'))
-  if_false = evaluates(parse_term('if false then t₂ else t₃'), parse_term('t₃'))
-
-  expect(if_true).to look_like 'if true then t₂ else t₃ → t₂'
-  expect(if_false).to look_like 'if false then t₂ else t₃ → t₃'
+  expect(parse_formula('if true then t₂ else t₃ → t₂')).to look_like 'if true then t₂ else t₃ → t₂'
+  expect(parse_formula('if false then t₂ else t₃ → t₃')).to look_like 'if false then t₂ else t₃ → t₃'
 end
 
 scope do |t₁, t₂, t₃, t₁′|
-  premise = evaluates(parse_term('t₁'), parse_term('t₁′'))
-  conclusion = evaluates(parse_term('if t₁ then t₂ else t₃'), parse_term('if t₁′ then t₂ else t₃'))
-
-  expect(premise).to look_like 't₁ → t₁′'
-  expect(conclusion).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
+  expect(parse_formula('t₁ → t₁′')).to look_like 't₁ → t₁′'
+  expect(parse_formula('if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
 end
 
 class State
