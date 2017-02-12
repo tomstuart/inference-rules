@@ -266,21 +266,21 @@ def find_variable(formula, name)
 end
 
 term = parse_term('t₁')
-state = State.new.unify(term, yes)
-expect(state.value_of(find_variable(term, 't₁'))).to eq yes
+state = State.new.unify(term, parse_term('true'))
+expect(state.value_of(find_variable(term, 't₁'))).to look_like 'true'
 
 term₁ = parse_term('t₁')
 term₂ = parse_term('t₂')
-state = State.new.unify(term₂, no).unify(term₂, term₁)
-expect(state.value_of(find_variable(term₁, 't₁'))).to eq no
+state = State.new.unify(term₂, parse_term('false')).unify(term₂, term₁)
+expect(state.value_of(find_variable(term₁, 't₁'))).to look_like 'false'
 
 if_true = parse_formula('if true then t₂ else t₃ → t₂')
 if_false = parse_formula('if false then t₂ else t₃ → t₃')
 formula = parse_formula('if true then false else true → result')
 state = State.new.unify(formula, if_true)
-expect(state.value_of(find_variable(if_true, 't₂'))).to eq no
-expect(state.value_of(find_variable(if_true, 't₃'))).to eq yes
-expect(state.value_of(find_variable(formula, 'result'))).to eq no
+expect(state.value_of(find_variable(if_true, 't₂'))).to look_like 'false'
+expect(state.value_of(find_variable(if_true, 't₃'))).to look_like 'true'
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'false'
 state = State.new.unify(formula, if_false)
 expect(state).to be_nil
 
@@ -290,9 +290,9 @@ formula = parse_formula('if false then false else true → result')
 state = State.new.unify(formula, if_true)
 expect(state).to be_nil
 state = State.new.unify(formula, if_false)
-expect(state.value_of(find_variable(if_false, 't₂'))).to eq no
-expect(state.value_of(find_variable(if_false, 't₃'))).to eq yes
-expect(state.value_of(find_variable(formula, 'result'))).to eq yes
+expect(state.value_of(find_variable(if_false, 't₂'))).to look_like 'false'
+expect(state.value_of(find_variable(if_false, 't₃'))).to look_like 'true'
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
 class Rule
   def initialize(premises, conclusion)
@@ -337,7 +337,7 @@ formula = parse_formula('if false then false else true → result')
 state = State.new
 matches = match_rules(rules, formula, state)
 rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
-expect(state.value_of(find_variable(formula, 'result'))).to eq yes
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
 formula = parse_formula('if if true then true else false then false else true → result')
 state = State.new
@@ -363,14 +363,14 @@ formula = parse_formula('if false then false else true → result')
 states = derive(rules, formula, State.new)
 expect(states.length).to eq 1
 state = states.first
-expect(state.value_of(find_variable(formula, 'result'))).to eq yes
+expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
 formula = parse_formula('if if true then true else false then false else true → result')
 states = derive(rules, formula, State.new)
 expect(states.length).to eq 1
 state = states.first
 expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
-formula = evaluates(state.value_of(find_variable(formula, 'result')), Builder.new.build_variable('result'))
+formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('result'))
 states = derive(rules, formula, State.new)
 expect(states.length).to eq 1
 state = states.first
