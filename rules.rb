@@ -41,9 +41,95 @@ class Formula < Struct.new(:parts)
   end
 end
 
+class Parser
+  def parse(string)
+    self.string = string
+    parse_everything
+  end
+
+  private
+
+  attr_reader :string
+
+  def string=(string)
+    @string = string.strip
+  end
+
+  def parse_everything
+    result = parse_term
+    complain unless string.empty?
+    result
+  end
+
+  def parse_term
+    if can_read? %r{if}
+      parse_conditional
+    elsif can_read? %r{true|false}
+      parse_boolean
+    else
+      complain
+    end
+  end
+
+  def parse_conditional
+    read %r{if}
+    condition = parse_term
+    read %r{then}
+    consequent = parse_term
+    read %r{else}
+    alternative = parse_term
+
+    Formula.new([:if, condition, :then, consequent, :else, alternative])
+  end
+
+  def parse_boolean
+    case read_boolean
+    when 'true'
+      :true
+    when 'false'
+      :false
+    else
+      complain
+    end
+  end
+
+  def read_boolean
+    read %r{true|false}
+  end
+
+  def can_read?(pattern)
+    !try_match(pattern).nil?
+  end
+
+  def read(pattern)
+    match = try_match(pattern) || complain(pattern)
+    self.string = match.post_match
+    match.to_s
+  end
+
+  def try_match(pattern)
+    /\A#{pattern}/.match(string)
+  end
+
+  def complain(expected = nil)
+    complaint = "unexpected #{string.slice(0)}"
+    complaint << ", expected #{expected.inspect}" if expected
+
+    raise complaint
+  end
+end
+
+def parse_term(string)
+  Parser.new.parse(string)
+end
+
 def form(*args)
   Formula.new(args)
 end
+
+expect(parse_term('true')).to eq :true
+expect(parse_term('if false then false else true')).to eq form(:if, :false, :then, :false, :else, :true)
+expect(parse_term('if if true then true else false then false else true')).to eq form(:if, form(:if, :true, :then, :true, :else, :false), :then, :false, :else, :true)
 
 scope do |t₂, t₃|
   if_true = form(form(:if, :true, :then, t₂, :else, t₃), :→, t₂)
