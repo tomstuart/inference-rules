@@ -249,7 +249,7 @@ end
 scope do |t₂, t₃, result|
   if_true = evaluates(conditional(yes, t₂, t₃), t₂)
   if_false = evaluates(conditional(no, t₂, t₃), t₃)
-  formula = evaluates(conditional(yes, no, yes), result)
+  formula = evaluates(parse_term('if true then false else true'), result)
 
   state = State.new.unify(formula, if_true)
   expect(state.value_of(t₂)).to eq no
@@ -263,7 +263,7 @@ end
 scope do |t₂, t₃, result|
   if_true = evaluates(conditional(yes, t₂, t₃), t₂)
   if_false = evaluates(conditional(no, t₂, t₃), t₃)
-  formula = evaluates(conditional(no, no, yes), result)
+  formula = evaluates(parse_term('if false then false else true'), result)
 
   state = State.new.unify(formula, if_true)
   expect(state).to be_nil
@@ -314,7 +314,7 @@ def match_rules(rules, formula, state)
 end
 
 scope do |result|
-  formula = evaluates(conditional(no, no, yes), result)
+  formula = evaluates(parse_term('if false then false else true'), result)
   state = State.new
   matches = match_rules(rules, formula, state)
   rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
@@ -322,7 +322,7 @@ scope do |result|
 end
 
 scope do |result|
-  formula = evaluates(conditional(conditional(yes, yes, no), no, yes), result)
+  formula = evaluates(parse_term('if if true then true else false then false else true'), result)
   state = State.new
 
   matches = match_rules(rules, formula, state)
@@ -348,7 +348,7 @@ def derive(rules, formula, state)
 end
 
 scope do |result|
-  formula = evaluates(conditional(no, no, yes), result)
+  formula = evaluates(parse_term('if false then false else true'), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
@@ -356,7 +356,7 @@ scope do |result|
 end
 
 scope do |result|
-  formula = evaluates(conditional(conditional(yes, yes, no), no, yes), result)
+  formula = evaluates(parse_term('if if true then true else false then false else true'), result)
   states = derive(rules, formula, State.new)
   expect(states.length).to eq 1
   state = states.first
