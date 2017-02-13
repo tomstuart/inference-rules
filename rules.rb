@@ -52,6 +52,22 @@ class Builder
     Formula.new([:if, condition, :then, consequent, :else, alternative])
   end
 
+  def build_zero
+    :'0'
+  end
+
+  def build_succ(term)
+    Formula.new([:succ, term])
+  end
+
+  def build_pred(term)
+    Formula.new([:pred, term])
+  end
+
+  def build_iszero(term)
+    Formula.new([:iszero, term])
+  end
+
   def build_evaluates(before, after)
     Formula.new([before, :→, after])
   end
@@ -107,6 +123,10 @@ class Parser
       parse_conditional
     elsif can_read? %r{true|false}
       parse_boolean
+    elsif can_read? %r{0}
+      parse_zero
+    elsif can_read? %r{succ|pred|iszero}
+      parse_numeric_operation
     elsif can_read? %r{[\p{L}\p{N}]+\p{Po}*}
       parse_variable
     else
@@ -136,12 +156,37 @@ class Parser
     end
   end
 
+  def parse_zero
+    read %r{0}
+    builder.build_zero
+  end
+
+  def parse_numeric_operation
+    numeric_operation = read_numeric_operation
+    argument = parse_term
+
+    case numeric_operation
+    when 'succ'
+      builder.build_succ(argument)
+    when 'pred'
+      builder.build_pred(argument)
+    when 'iszero'
+      builder.build_iszero(argument)
+    else
+      complain
+    end
+  end
+
   def parse_variable
     builder.build_variable(read_name)
   end
 
   def read_boolean
     read %r{true|false}
+  end
+
+  def read_numeric_operation
+    read %r{succ|pred|iszero}
   end
 
   def read_name
