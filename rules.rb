@@ -76,6 +76,10 @@ class Builder
     Formula.new([element, :∈, set])
   end
 
+  def build_constant(name)
+    name
+  end
+
   def build_variable(name)
     variables[name]
   end
@@ -138,6 +142,8 @@ class Parser
       parse_zero
     elsif can_read? %r{succ|pred|iszero}
       parse_numeric_operation
+    elsif can_read? %r{[[:upper:]]+}
+      parse_constant
     elsif can_read? %r{[\p{L}\p{N}]+\p{Po}*}
       parse_variable
     else
@@ -188,6 +194,10 @@ class Parser
     end
   end
 
+  def parse_constant
+    builder.build_constant(read_constant)
+  end
+
   def parse_variable
     builder.build_variable(read_name)
   end
@@ -198,6 +208,10 @@ class Parser
 
   def read_numeric_operation
     read %r{succ|pred|iszero}
+  end
+
+  def read_constant
+    read %r{[[:upper:]]+}
   end
 
   def read_name
@@ -378,9 +392,9 @@ class Rule
 end
 
 rules = [
-  # -> { parse_rule([], 'true ∈ T') }, # FIXME T not a variable
-  # -> { parse_rule([], 'false ∈ T') }, # FIXME T not a variable
-  # -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], 'if t₁ then t₂ else t₃ ∈ T') }, # FIXME T not a variable
+  -> { parse_rule([], 'true ∈ T') },
+  -> { parse_rule([], 'false ∈ T') },
+  -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], 'if t₁ then t₂ else t₃ ∈ T') },
 
   -> { parse_rule([], 'if true then t₂ else t₃ → t₂') },
   -> { parse_rule([], 'if false then t₂ else t₃ → t₃') },
@@ -506,20 +520,20 @@ expect('if if true then true else false then false else true').to evaluate_to 'f
 expect('if if if true then false else true then true else false then false else true').to evaluate_to 'true'
 
 rules += [
-  # -> { parse_rule([], '0 ∈ T') }, # FIXME T not a variable
-  # -> { parse_rule(['t₁ ∈ T'], 'succ t₁ ∈ T') }, # FIXME T not a variable
-  # -> { parse_rule(['t₁ ∈ T'], 'pred t₁ ∈ T') }, # FIXME T not a variable
-  # -> { parse_rule(['t₁ ∈ T'], 'iszero t₁ ∈ T') }, # FIXME T not a variable
+  -> { parse_rule([], '0 ∈ T') },
+  -> { parse_rule(['t₁ ∈ T'], 'succ t₁ ∈ T') },
+  -> { parse_rule(['t₁ ∈ T'], 'pred t₁ ∈ T') },
+  -> { parse_rule(['t₁ ∈ T'], 'iszero t₁ ∈ T') },
 
-  -> { parse_rule([], '0 ∈ NV') }, # FIXME NV not a variable
-  -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') }, # FIXME NV not a variable
+  -> { parse_rule([], '0 ∈ NV') },
+  -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') },
 
   -> { parse_rule(['t₁ → t₁′'], 'succ t₁ → succ t₁′') },
   -> { parse_rule([], 'pred 0 → 0') },
-  -> { parse_rule(['nv₁ ∈ NV'], 'pred succ nv₁ → nv₁') }, # FIXME NV not a variable
+  -> { parse_rule(['nv₁ ∈ NV'], 'pred succ nv₁ → nv₁') },
   -> { parse_rule(['t₁ → t₁′'], 'pred t₁ → pred t₁′') },
   -> { parse_rule([], 'iszero 0 → true') },
-  -> { parse_rule(['nv₁ ∈ NV'], 'iszero succ nv₁ → false') }, # FIXME NV not a variable
+  -> { parse_rule(['nv₁ ∈ NV'], 'iszero succ nv₁ → false') },
   -> { parse_rule(['t₁ → t₁′'], 'iszero t₁ → iszero t₁′') }
 ]
 
