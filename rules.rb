@@ -502,14 +502,23 @@ expect('if if true then true else false then false else true').to evaluate_to 'f
 expect('if if if true then false else true then true else false then false else true').to evaluate_to 'true'
 
 rules += [
+  -> { parse_rule([], '0 ∈ NV') }, # FIXME NV not a variable
+  -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') }, # FIXME NV not a variable
+
   -> { parse_rule(['t₁ → t₁′'], 'succ t₁ → succ t₁′') },
   -> { parse_rule([], 'pred 0 → 0') },
-  -> { parse_rule([], 'pred succ nv₁ → nv₁') },
+  -> { parse_rule(['nv₁ ∈ NV'], 'pred succ nv₁ → nv₁') }, # FIXME NV not a variable
   -> { parse_rule(['t₁ → t₁′'], 'pred t₁ → pred t₁′') },
   -> { parse_rule([], 'iszero 0 → true') },
-  -> { parse_rule([], 'iszero succ nv₁ → false') },
+  -> { parse_rule(['nv₁ ∈ NV'], 'iszero succ nv₁ → false') }, # FIXME NV not a variable
   -> { parse_rule(['t₁ → t₁′'], 'iszero t₁ → iszero t₁′') }
 ]
 
 expect('pred succ succ 0').to evaluate_to 'succ 0'
 expect('if iszero succ 0 then succ pred 0 else pred succ 0').to evaluate_to '0'
+expect('pred succ succ pred 0').to evaluate_to 'succ 0'
+expect('pred succ succ true').to evaluate_to 'pred succ succ true'
+expect('iszero 0').to evaluate_to 'true'
+expect('iszero succ 0').to evaluate_to 'false'
+expect('iszero succ succ succ succ 0').to evaluate_to 'false'
+expect('iszero succ true').to evaluate_to 'iszero succ true'
