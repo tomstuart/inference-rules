@@ -72,6 +72,10 @@ class Builder
     Formula.new([before, :→, after])
   end
 
+  def build_element_of(element, set)
+    Formula.new([element, :∈, set])
+  end
+
   def build_variable(name)
     variables[name]
   end
@@ -111,11 +115,18 @@ class Parser
   end
 
   def parse_formula
-    before = parse_term
-    read %r{→}
-    after = parse_term
+    left = parse_term
+    symbol = read %r{→|∈}
+    right = parse_term
 
-    builder.build_evaluates(before, after)
+    case symbol
+    when '→'
+      builder.build_evaluates(left, right)
+    when '∈'
+      builder.build_element_of(left, right)
+    else
+      complain
+    end
   end
 
   def parse_term
