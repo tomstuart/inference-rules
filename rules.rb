@@ -396,9 +396,9 @@ rules = [
   -> { parse_rule([], 'false ∈ T') },
   -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], 'if t₁ then t₂ else t₃ ∈ T') },
 
-  -> { parse_rule([], 'if true then t₂ else t₃ → t₂') },
-  -> { parse_rule([], 'if false then t₂ else t₃ → t₃') },
-  -> { parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
+  -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], 'if true then t₂ else t₃ → t₂') },
+  -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], 'if false then t₂ else t₃ → t₃') },
+  -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T', 't₁′ ∈ T'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
 ]
 
 def match_rules(rules, formula, state)
@@ -419,12 +419,12 @@ state = State.new
 matches = match_rules(rules, formula, state)
 rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
 expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if t₁′ then false else true'
-expect(rule.premises.length).to eq 1
+expect(rule.premises.length).to eq 5
 premise = rule.premises.first
 matches = match_rules(rules, premise, state)
 rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if true then' }
 expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
-expect(rule.premises.length).to eq 0
+expect(rule.premises.length).to eq 2
 
 def derive(rules, formula, state)
   match_rules(rules, formula, state).flat_map { |rule, state|
@@ -528,13 +528,13 @@ rules += [
   -> { parse_rule([], '0 ∈ NV') },
   -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') },
 
-  -> { parse_rule(['t₁ → t₁′'], 'succ t₁ → succ t₁′') },
+  -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'succ t₁ → succ t₁′') },
   -> { parse_rule([], 'pred 0 → 0') },
   -> { parse_rule(['nv₁ ∈ NV'], 'pred succ nv₁ → nv₁') },
-  -> { parse_rule(['t₁ → t₁′'], 'pred t₁ → pred t₁′') },
+  -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'pred t₁ → pred t₁′') },
   -> { parse_rule([], 'iszero 0 → true') },
   -> { parse_rule(['nv₁ ∈ NV'], 'iszero succ nv₁ → false') },
-  -> { parse_rule(['t₁ → t₁′'], 'iszero t₁ → iszero t₁′') }
+  -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'iszero t₁ → iszero t₁′') }
 ]
 
 expect('pred succ succ 0').to evaluate_to 'succ 0'
