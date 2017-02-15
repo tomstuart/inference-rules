@@ -447,7 +447,7 @@ def eval1(rules, term)
   states = derive(rules, formula, State.new)
 
   raise NoRuleApplies if states.empty?
-  raise Nondeterministic if states.length > 1
+  raise Nondeterministic, states.map { |s| s.value_of(result) } if states.length > 1
 
   states.first.value_of(result)
 end
