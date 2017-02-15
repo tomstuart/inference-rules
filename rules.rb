@@ -477,7 +477,12 @@ end
 
 RSpec::Matchers.define :evaluate_to do |expected|
   match do |actual|
-    eval(rules, parse_term(actual)) == parse_term(expected)
+    @result = eval(rules, parse_term(actual))
+    @result == parse_term(expected)
+  end
+
+  failure_message do |actual|
+    %Q{expected "#{actual}" to evaluate to "#{expected}", but got "#{@result}" instead}
   end
 end
 
