@@ -378,6 +378,10 @@ class Rule
 end
 
 rules = [
+  # -> { parse_rule([], 'true ∈ T') }, # FIXME T not a variable
+  # -> { parse_rule([], 'false ∈ T') }, # FIXME T not a variable
+  # -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], 'if t₁ then t₂ else t₃ ∈ T') }, # FIXME T not a variable
+
   -> { parse_rule([], 'if true then t₂ else t₃ → t₂') },
   -> { parse_rule([], 'if false then t₂ else t₃ → t₃') },
   -> { parse_rule(['t₁ → t₁′'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
@@ -502,6 +506,11 @@ expect('if if true then true else false then false else true').to evaluate_to 'f
 expect('if if if true then false else true then true else false then false else true').to evaluate_to 'true'
 
 rules += [
+  # -> { parse_rule([], '0 ∈ T') }, # FIXME T not a variable
+  # -> { parse_rule(['t₁ ∈ T'], 'succ t₁ ∈ T') }, # FIXME T not a variable
+  # -> { parse_rule(['t₁ ∈ T'], 'pred t₁ ∈ T') }, # FIXME T not a variable
+  # -> { parse_rule(['t₁ ∈ T'], 'iszero t₁ ∈ T') }, # FIXME T not a variable
+
   -> { parse_rule([], '0 ∈ NV') }, # FIXME NV not a variable
   -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') }, # FIXME NV not a variable
 
