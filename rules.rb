@@ -13,14 +13,8 @@ module Atom
   end
 end
 
-class Variable
+class Variable < Struct.new(:name, :scope)
   include Atom
-
-  def initialize(name)
-    @name = name
-  end
-
-  attr_reader :name
 
   def to_s
     name
@@ -36,8 +30,8 @@ class Formula < Struct.new(:parts)
 end
 
 class Builder
-  def initialize
-    self.variables = Hash.new { |vars, name| vars[name] = Variable.new(name) }
+  def initialize(scope = Object.new)
+    self.scope = scope
   end
 
   def build_true
@@ -81,12 +75,12 @@ class Builder
   end
 
   def build_variable(name)
-    variables[name]
+    Variable.new(name, scope)
   end
 
   private
 
-  attr_accessor :variables
+  attr_accessor :scope
 end
 
 class Parser
