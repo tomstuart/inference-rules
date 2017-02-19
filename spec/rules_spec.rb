@@ -30,15 +30,13 @@ RSpec.describe do
     definition = Definition.new(rules)
 
     formula = parse('(if false then false else true) → _result')
-    state = State.new
-    matches = definition.match_rules(formula, state)
+    matches = definition.match_rules(formula)
     expect(matches.length).to eq 2
     state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
-    state = State.new
-    matches = definition.match_rules(formula, state)
+    matches = definition.match_rules(formula)
     expect(matches.length).to eq 1
     state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if _t₁′ then false else true'

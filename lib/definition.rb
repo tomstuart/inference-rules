@@ -1,9 +1,11 @@
+require 'state'
+
 class Definition
   def initialize(rules)
     self.rules = rules
   end
 
-  def match_rules(expression, state)
+  def match_rules(expression, state = State.new)
     rules.
       select { |rule| rule.matches?(expression, state) }.
       map { |rule| rule.match(expression, state) }
