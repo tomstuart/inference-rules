@@ -146,39 +146,39 @@ RSpec.describe do
       end
     end
 
-    describe 'reducing' do
-      matcher :reduce_to do |expected|
+    describe 'evaluating' do
+      matcher :evaluate_to do |expected|
         match do |actual|
           eval1(definition, parse(actual)) == parse(expected)
         end
       end
 
       specify do
-        expect('if false then false else true').to reduce_to 'true'
+        expect('if false then false else true').to evaluate_to 'true'
       end
 
       specify do
-        expect('if (if true then true else false) then false else true').to reduce_to 'if true then false else true'
-        expect('if true then false else true').to reduce_to 'false'
+        expect('if (if true then true else false) then false else true').to evaluate_to 'if true then false else true'
+        expect('if true then false else true').to evaluate_to 'false'
       end
 
       specify do
-        expect('if (if (if true then false else true) then true else false) then false else true').to reduce_to 'if (if false then true else false) then false else true'
-        expect('if (if false then true else false) then false else true').to reduce_to 'if false then false else true'
-        expect('if false then false else true').to reduce_to 'true'
+        expect('if (if (if true then false else true) then true else false) then false else true').to evaluate_to 'if (if false then true else false) then false else true'
+        expect('if (if false then true else false) then false else true').to evaluate_to 'if false then false else true'
+        expect('if false then false else true').to evaluate_to 'true'
       end
     end
 
-    describe 'evaluating' do
-      matcher :evaluate_to do |expected|
+    describe 'finally evaluating' do
+      matcher :finally_evaluate_to do |expected|
         match do |actual|
           evaluate(definition, parse(actual)) == parse(expected)
         end
       end
 
-      specify { expect('if false then false else true').to evaluate_to 'true' }
-      specify { expect('if (if true then true else false) then false else true').to evaluate_to 'false' }
-      specify { expect('if (if (if true then false else true) then true else false) then false else true').to evaluate_to 'true' }
+      specify { expect('if false then false else true').to finally_evaluate_to 'true' }
+      specify { expect('if (if true then true else false) then false else true').to finally_evaluate_to 'false' }
+      specify { expect('if (if (if true then false else true) then true else false) then false else true').to finally_evaluate_to 'true' }
     end
   end
 
@@ -186,20 +186,20 @@ RSpec.describe do
     let(:definition) { Definition.new(boolean_syntax + boolean_semantics + arithmetic_syntax + arithmetic_semantics) }
 
     describe 'evaluating' do
-      matcher :evaluate_to do |expected|
+      matcher :finally_evaluate_to do |expected|
         match do |actual|
           evaluate(definition, parse(actual)) == parse(expected)
         end
       end
 
-      specify { expect('pred (succ (succ 0))').to evaluate_to 'succ 0' }
-      specify { expect('if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))').to evaluate_to '0' }
-      specify { expect('pred (succ (succ (pred 0)))').to evaluate_to 'succ 0' }
-      specify { expect('pred (succ (succ true))').to evaluate_to 'pred (succ (succ true))' }
-      specify { expect('iszero 0').to evaluate_to 'true' }
-      specify { expect('iszero (succ 0)').to evaluate_to 'false' }
-      specify { expect('iszero (succ (succ (succ (succ 0))))').to evaluate_to 'false' }
-      specify { expect('iszero (succ true)').to evaluate_to 'iszero (succ true)' }
+      specify { expect('pred (succ (succ 0))').to finally_evaluate_to 'succ 0' }
+      specify { expect('if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))').to finally_evaluate_to '0' }
+      specify { expect('pred (succ (succ (pred 0)))').to finally_evaluate_to 'succ 0' }
+      specify { expect('pred (succ (succ true))').to finally_evaluate_to 'pred (succ (succ true))' }
+      specify { expect('iszero 0').to finally_evaluate_to 'true' }
+      specify { expect('iszero (succ 0)').to finally_evaluate_to 'false' }
+      specify { expect('iszero (succ (succ (succ (succ 0))))').to finally_evaluate_to 'false' }
+      specify { expect('iszero (succ true)').to finally_evaluate_to 'iszero (succ true)' }
     end
   end
 end
