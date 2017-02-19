@@ -23,10 +23,6 @@ class Rule
     [next_state, premises.map { |p| p.call(builder) }] if next_state
   end
 
-  def matches?(*args)
-    !match(*args).nil?
-  end
-
   private
 
   attr_accessor :premises, :conclusion

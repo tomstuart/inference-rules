@@ -6,9 +6,7 @@ class Definition
   end
 
   def match_rules(expression, state = State.new)
-    rules.
-      select { |rule| rule.matches?(expression, state) }.
-      map { |rule| rule.match(expression, state) }
+    rules.map { |rule| rule.match(expression, state) }.compact
   end
 
   def derive(expression, state = State.new)
