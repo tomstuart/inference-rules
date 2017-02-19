@@ -9,11 +9,7 @@ module AST
     end
 
     def find_variable(name)
-      if self.name == name
-        self
-      else
-        nil
-      end
+      self if name == self.name
     end
   end
 end
