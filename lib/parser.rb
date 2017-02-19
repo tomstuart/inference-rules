@@ -3,14 +3,9 @@ class Parser
     @builder = builder
   end
 
-  def parse_complete_formula(string)
+  def parse(string)
     self.string = string
-    parse_everything { parse_term }
-  end
-
-  def parse_complete_term(string)
-    self.string = string
-    parse_everything { parse_term }
+    parse_everything
   end
 
   private
@@ -22,9 +17,9 @@ class Parser
   end
 
   def parse_everything
-    result = yield
+    term = parse_term
     complain unless string.empty?
-    result
+    term
   end
 
   def parse_term
@@ -34,7 +29,7 @@ class Parser
     if atoms.length == 1
       atoms.first
     else
-      Formula.new(atoms)
+      builder.build_formula(atoms)
     end
   end
 

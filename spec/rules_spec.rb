@@ -13,47 +13,51 @@ RSpec.describe do
       end
     end
 
-    def parse_term(string)
-      Parser.new(Builder.new).parse_complete_term(string)
-    end
-
-    def parse_formula(string)
-      Parser.new(Builder.new).parse_complete_formula(string)
+    def parse(string)
+      Parser.new(Builder.new).parse(string)
     end
 
     def parse_rule(premise_strings, conclusion_string)
       builder = Builder.new
-      premises = premise_strings.map { |string| Parser.new(builder).parse_complete_formula(string) }
-      conclusion = Parser.new(builder).parse_complete_formula(conclusion_string)
+      premises = premise_strings.map { |string| Parser.new(builder).parse(string) }
+      conclusion = Parser.new(builder).parse(conclusion_string)
 
       Rule.new(premises, conclusion)
     end
 
-    def yes(*args)
-      Builder.new.build_true(*args)
+    def symbol(name)
+      Builder.new.build_symbol(name)
     end
 
-    def no(*args)
-      Builder.new.build_false(*args)
+    def yes
+      symbol('true')
     end
 
-    def conditional(*args)
-      Builder.new.build_conditional(*args)
+    def no
+      symbol('false')
     end
 
-    def evaluates(*args)
-      Builder.new.build_evaluates(*args)
+    def conditional(condition, consequent, alternative)
+      Builder.new.build_formula([
+        symbol('if'),   condition,
+        symbol('then'), consequent,
+        symbol('else'), alternative
+      ])
     end
 
-    expect(parse_term('true')).to eq yes
-    expect(parse_term('if false then false else true')).to eq conditional(no, no, yes)
-    expect(parse_term('if (if true then true else false) then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
+    def evaluates(before, after)
+      Builder.new.build_formula([before, symbol('→'), after])
+    end
 
-    expect(parse_formula('(if true then _t₂ else _t₃) → _t₂')).to look_like 'if true then t₂ else t₃ → t₂'
-    expect(parse_formula('(if false then _t₂ else _t₃) → _t₃')).to look_like 'if false then t₂ else t₃ → t₃'
+    expect(parse('true')).to eq yes
+    expect(parse('if false then false else true')).to eq conditional(no, no, yes)
+    expect(parse('if (if true then true else false) then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
-    expect(parse_formula('_t₁ → _t₁′')).to look_like 't₁ → t₁′'
-    expect(parse_formula('(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
+    expect(parse('(if true then _t₂ else _t₃) → _t₂')).to look_like 'if true then t₂ else t₃ → t₂'
+    expect(parse('(if false then _t₂ else _t₃) → _t₃')).to look_like 'if false then t₂ else t₃ → t₃'
+
+    expect(parse('_t₁ → _t₁′')).to look_like 't₁ → t₁′'
+    expect(parse('(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
 
     def find_variable(formula, name)
       case formula
@@ -68,18 +72,18 @@ RSpec.describe do
       end
     end
 
-    term = parse_term('_t₁')
-    state = State.new.unify(term, parse_term('true'))
+    term = parse('_t₁')
+    state = State.new.unify(term, parse('true'))
     expect(state.value_of(find_variable(term, 't₁'))).to look_like 'true'
 
-    term₁ = parse_term('_t₁')
-    term₂ = parse_term('_t₂')
-    state = State.new.unify(term₂, parse_term('false')).unify(term₂, term₁)
+    term₁ = parse('_t₁')
+    term₂ = parse('_t₂')
+    state = State.new.unify(term₂, parse('false')).unify(term₂, term₁)
     expect(state.value_of(find_variable(term₁, 't₁'))).to look_like 'false'
 
-    if_true = parse_formula('(if true then _t₂ else _t₃) → _t₂')
-    if_false = parse_formula('(if false then _t₂ else _t₃) → _t₃')
-    formula = parse_formula('(if true then false else true) → _result')
+    if_true = parse('(if true then _t₂ else _t₃) → _t₂')
+    if_false = parse('(if false then _t₂ else _t₃) → _t₃')
+    formula = parse('(if true then false else true) → _result')
     state = State.new.unify(formula, if_true)
     expect(state.value_of(find_variable(if_true, 't₂'))).to look_like 'false'
     expect(state.value_of(find_variable(if_true, 't₃'))).to look_like 'true'
@@ -87,9 +91,9 @@ RSpec.describe do
     state = State.new.unify(formula, if_false)
     expect(state).to be_nil
 
-    if_true = parse_formula('(if true then _t₂ else _t₃) → _t₂')
-    if_false = parse_formula('(if false then _t₂ else _t₃) → _t₃')
-    formula = parse_formula('(if false then false else true) → _result')
+    if_true = parse('(if true then _t₂ else _t₃) → _t₂')
+    if_false = parse('(if false then _t₂ else _t₃) → _t₃')
+    formula = parse('(if false then false else true) → _result')
     state = State.new.unify(formula, if_true)
     expect(state).to be_nil
     state = State.new.unify(formula, if_false)
@@ -114,13 +118,13 @@ RSpec.describe do
         map { |rule| [rule, rule.match(formula, state)] }
     end
 
-    formula = parse_formula('(if false then false else true) → _result')
+    formula = parse('(if false then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
     rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
-    formula = parse_formula('(if (if true then true else false) then false else true) → _result')
+    formula = parse('(if (if true then true else false) then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
     rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
@@ -140,34 +144,34 @@ RSpec.describe do
       }.compact
     end
 
-    formula = parse_formula('(if false then false else true) → _result')
+    formula = parse('(if false then false else true) → _result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
-    formula = parse_formula('(if (if true then true else false) then false else true) → _result')
+    formula = parse('(if (if true then true else false) then false else true) → _result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
-    formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('_result'))
+    formula = evaluates(state.value_of(find_variable(formula, 'result')), parse('_result'))
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'false'
 
-    formula = parse_formula('(if (if (if true then false else true) then true else false) then false else true) → _result')
+    formula = parse('(if (if (if true then false else true) then true else false) then false else true) → _result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if if false then true else false then false else true'
-    formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('_result'))
+    formula = evaluates(state.value_of(find_variable(formula, 'result')), parse('_result'))
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if false then false else true'
-    formula = Builder.new.build_evaluates(state.value_of(find_variable(formula, 'result')), parse_term('_result'))
+    formula = evaluates(state.value_of(find_variable(formula, 'result')), parse('_result'))
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
@@ -177,8 +181,8 @@ RSpec.describe do
     Nondeterministic = Class.new(StandardError)
 
     def eval1(rules, term)
-      result = Builder.new.build_variable('result')
-      formula = Builder.new.build_evaluates(term, result)
+      result = parse('_result')
+      formula = evaluates(term, result)
       states = derive(rules, formula, State.new)
 
       raise NoRuleApplies if states.empty?
@@ -189,7 +193,7 @@ RSpec.describe do
 
     RSpec::Matchers.define :reduce_to do |expected|
       match do |actual|
-        eval1(rules, parse_term(actual)) == parse_term(expected)
+        eval1(rules, parse(actual)) == parse(expected)
       end
     end
 
@@ -212,8 +216,8 @@ RSpec.describe do
 
     RSpec::Matchers.define :evaluate_to do |expected|
       match do |actual|
-        @result = evaluate(rules, parse_term(actual))
-        @result == parse_term(expected)
+        @result = evaluate(rules, parse(actual))
+        @result == parse(expected)
       end
 
       failure_message do |actual|
