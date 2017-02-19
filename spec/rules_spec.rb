@@ -92,18 +92,18 @@ RSpec.describe do
     formula = parse('(if false then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
+    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if false then' }
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
-    expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if t₁′ then false else true'
+    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if _t₁ then' }
+    expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if _t₁′ then false else true'
     expect(rule.premises.length).to eq 5
     premise = rule.premises.first
     matches = match_rules(rules, premise, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if true then' }
+    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if true then' }
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if true then false else true'
     expect(rule.premises.length).to eq 2
 
@@ -136,7 +136,7 @@ RSpec.describe do
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
-    expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if if false then true else false then false else true'
+    expect(state.value_of(find_variable(formula, 'result'))).to look_like 'if (if false then true else false) then false else true'
     formula = evaluates(state.value_of(find_variable(formula, 'result')), parse('_result'))
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
