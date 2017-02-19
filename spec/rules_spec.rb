@@ -17,12 +17,9 @@ RSpec.describe do
       Parser.parse(string)
     end
 
-    def parse_rule(premise_strings, conclusion_string)
+    def rule(premises, conclusion)
       parser = Parser.new
-      premises = premise_strings.map(&parser.method(:parse))
-      conclusion = parser.parse(conclusion_string)
-
-      Rule.new(premises, conclusion)
+      Rule.new(premises.map(&parser.method(:parse)), parser.parse(conclusion))
     end
 
     def symbol(name)
@@ -102,13 +99,13 @@ RSpec.describe do
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
     rules = [
-      -> { parse_rule([], 'true ∈ T') },
-      -> { parse_rule([], 'false ∈ T') },
-      -> { parse_rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T') },
+      -> { rule([], 'true ∈ T') },
+      -> { rule([], 'false ∈ T') },
+      -> { rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T') },
 
-      -> { parse_rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if true then _t₂ else _t₃) → _t₂') },
-      -> { parse_rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if false then _t₂ else _t₃) → _t₃') },
-      -> { parse_rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)') }
+      -> { rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if true then _t₂ else _t₃) → _t₂') },
+      -> { rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if false then _t₂ else _t₃) → _t₃') },
+      -> { rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)') }
     ]
 
     def match_rules(rules, formula, state)
@@ -230,21 +227,21 @@ RSpec.describe do
     expect('if (if (if true then false else true) then true else false) then false else true').to evaluate_to 'true'
 
     rules += [
-      -> { parse_rule([], '0 ∈ T') },
-      -> { parse_rule(['_t₁ ∈ T'], '(succ _t₁) ∈ T') },
-      -> { parse_rule(['_t₁ ∈ T'], '(pred _t₁) ∈ T') },
-      -> { parse_rule(['_t₁ ∈ T'], '(iszero _t₁) ∈ T') },
+      -> { rule([], '0 ∈ T') },
+      -> { rule(['_t₁ ∈ T'], '(succ _t₁) ∈ T') },
+      -> { rule(['_t₁ ∈ T'], '(pred _t₁) ∈ T') },
+      -> { rule(['_t₁ ∈ T'], '(iszero _t₁) ∈ T') },
 
-      -> { parse_rule([], '0 ∈ NV') },
-      -> { parse_rule(['_nv₁ ∈ NV'], '(succ _nv₁) ∈ NV') },
+      -> { rule([], '0 ∈ NV') },
+      -> { rule(['_nv₁ ∈ NV'], '(succ _nv₁) ∈ NV') },
 
-      -> { parse_rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(succ _t₁) → (succ _t₁′)') },
-      -> { parse_rule([], '(pred 0) → 0') },
-      -> { parse_rule(['_nv₁ ∈ NV'], '(pred (succ _nv₁)) → _nv₁') },
-      -> { parse_rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(pred _t₁) → (pred _t₁′)') },
-      -> { parse_rule([], '(iszero 0) → true') },
-      -> { parse_rule(['_nv₁ ∈ NV'], '(iszero (succ _nv₁)) → false') },
-      -> { parse_rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(iszero _t₁) → (iszero _t₁′)') }
+      -> { rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(succ _t₁) → (succ _t₁′)') },
+      -> { rule([], '(pred 0) → 0') },
+      -> { rule(['_nv₁ ∈ NV'], '(pred (succ _nv₁)) → _nv₁') },
+      -> { rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(pred _t₁) → (pred _t₁′)') },
+      -> { rule([], '(iszero 0) → true') },
+      -> { rule(['_nv₁ ∈ NV'], '(iszero (succ _nv₁)) → false') },
+      -> { rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(iszero _t₁) → (iszero _t₁′)') }
     ]
 
     expect('pred (succ (succ 0))').to evaluate_to 'succ 0'
