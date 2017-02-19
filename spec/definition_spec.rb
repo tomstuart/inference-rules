@@ -1,5 +1,5 @@
 require 'definition'
-require 'evaluator'
+require 'relation'
 
 require 'support/builder_helpers'
 require 'support/parser_helpers'
@@ -58,7 +58,7 @@ RSpec.describe do
 
   describe 'boolean' do
     let(:definition) { Definition.new(boolean_syntax + boolean_semantics) }
-    let(:evaluator) { Evaluator.new(definition, keyword('→')) }
+    let(:relation) { Relation.new('→', definition) }
 
     describe 'matching' do
       specify do
@@ -129,7 +129,7 @@ RSpec.describe do
     describe 'evaluating' do
       matcher :evaluate_to do |expected|
         match do |actual|
-          evaluator.eval1(parse(actual)) == parse(expected)
+          relation.once(parse(actual)) == parse(expected)
         end
       end
 
@@ -152,7 +152,7 @@ RSpec.describe do
     describe 'finally evaluating' do
       matcher :finally_evaluate_to do |expected|
         match do |actual|
-          evaluator.evaluate(parse(actual)) == parse(expected)
+          relation.many(parse(actual)) == parse(expected)
         end
       end
 
@@ -164,12 +164,12 @@ RSpec.describe do
 
   describe 'arithmetic' do
     let(:definition) { Definition.new(boolean_syntax + boolean_semantics + arithmetic_syntax + arithmetic_semantics) }
-    let(:evaluator) { Evaluator.new(definition, keyword('→')) }
+    let(:relation) { Relation.new('→', definition) }
 
     describe 'evaluating' do
       matcher :finally_evaluate_to do |expected|
         match do |actual|
-          evaluator.evaluate(parse(actual)) == parse(expected)
+          relation.many(parse(actual)) == parse(expected)
         end
       end
 
