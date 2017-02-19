@@ -1,4 +1,5 @@
 require 'definition'
+require 'evaluator'
 
 require 'support/builder_helpers'
 require 'support/parser_helpers'
@@ -55,30 +56,9 @@ RSpec.describe do
     sequence(before, keyword('→'), after)
   end
 
-  NoRuleApplies = Class.new(StandardError)
-  Nondeterministic = Class.new(StandardError)
-
-  def eval1(definition, term)
-    result = parse('_result')
-    formula = evaluates(term, result)
-    states = definition.derive(formula)
-
-    raise NoRuleApplies if states.empty?
-    raise Nondeterministic, states.map { |s| s.value_of(result) } if states.length > 1
-
-    states.first.value_of(result)
-  end
-
-  def evaluate(definition, term)
-    begin
-      evaluate(definition, eval1(definition, term))
-    rescue NoRuleApplies
-      term
-    end
-  end
-
   describe 'boolean' do
     let(:definition) { Definition.new(boolean_syntax + boolean_semantics) }
+    let(:evaluator) { Evaluator.new(definition, keyword('→')) }
 
     describe 'matching' do
       specify do
@@ -149,7 +129,7 @@ RSpec.describe do
     describe 'evaluating' do
       matcher :evaluate_to do |expected|
         match do |actual|
-          eval1(definition, parse(actual)) == parse(expected)
+          evaluator.eval1(parse(actual)) == parse(expected)
         end
       end
 
@@ -172,7 +152,7 @@ RSpec.describe do
     describe 'finally evaluating' do
       matcher :finally_evaluate_to do |expected|
         match do |actual|
-          evaluate(definition, parse(actual)) == parse(expected)
+          evaluator.evaluate(parse(actual)) == parse(expected)
         end
       end
 
@@ -184,11 +164,12 @@ RSpec.describe do
 
   describe 'arithmetic' do
     let(:definition) { Definition.new(boolean_syntax + boolean_semantics + arithmetic_syntax + arithmetic_semantics) }
+    let(:evaluator) { Evaluator.new(definition, keyword('→')) }
 
     describe 'evaluating' do
       matcher :finally_evaluate_to do |expected|
         match do |actual|
-          evaluate(definition, parse(actual)) == parse(expected)
+          evaluator.evaluate(parse(actual)) == parse(expected)
         end
       end
 
