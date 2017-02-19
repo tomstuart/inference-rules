@@ -7,34 +7,58 @@ RSpec.describe do
   include ParserHelpers
   include PrettyPrintingMatchers
 
-  specify do
-    term = parse('_t₁')
-    state = State.new.unify(term, parse('true'))
-    expect(state.value_of(term.find_variable('t₁'))).to look_like 'true'
+  describe do
+    let(:term) { parse('_t₁') }
+    let(:state) { State.new.unify(term, parse('true')) }
 
-    term₁ = parse('_t₁')
-    term₂ = parse('_t₂')
-    state = State.new.unify(term₂, parse('false')).unify(term₂, term₁)
-    expect(state.value_of(term₁.find_variable('t₁'))).to look_like 'false'
+    specify { expect(state.value_of(term.find_variable('t₁'))).to look_like 'true' }
+  end
 
-    if_true = parse('(if true then _t₂ else _t₃) → _t₂')
-    if_false = parse('(if false then _t₂ else _t₃) → _t₃')
-    formula = parse('(if true then false else true) → _result')
-    state = State.new.unify(formula, if_true)
-    expect(state.value_of(if_true.find_variable('t₂'))).to look_like 'false'
-    expect(state.value_of(if_true.find_variable('t₃'))).to look_like 'true'
-    expect(state.value_of(formula.find_variable('result'))).to look_like 'false'
-    state = State.new.unify(formula, if_false)
-    expect(state).to be_nil
+  describe do
+    let(:term₁) { parse('_t₁') }
+    let(:term₂) { parse('_t₂') }
+    let(:state) { State.new.unify(term₂, parse('false')).unify(term₂, term₁) }
 
-    if_true = parse('(if true then _t₂ else _t₃) → _t₂')
-    if_false = parse('(if false then _t₂ else _t₃) → _t₃')
-    formula = parse('(if false then false else true) → _result')
-    state = State.new.unify(formula, if_true)
-    expect(state).to be_nil
-    state = State.new.unify(formula, if_false)
-    expect(state.value_of(if_false.find_variable('t₂'))).to look_like 'false'
-    expect(state.value_of(if_false.find_variable('t₃'))).to look_like 'true'
-    expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
+    specify { expect(state.value_of(term₁.find_variable('t₁'))).to look_like 'false' }
+  end
+
+  describe do
+    let(:if_true) { parse('(if true then _t₂ else _t₃) → _t₂') }
+    let(:if_false) { parse('(if false then _t₂ else _t₃) → _t₃') }
+    let(:formula) { parse('(if true then false else true) → _result') }
+
+    describe do
+      let(:state) { State.new.unify(formula, if_true) }
+
+      specify { expect(state.value_of(if_true.find_variable('t₂'))).to look_like 'false' }
+      specify { expect(state.value_of(if_true.find_variable('t₃'))).to look_like 'true' }
+      specify { expect(state.value_of(formula.find_variable('result'))).to look_like 'false' }
+    end
+
+    describe do
+      let(:state) { State.new.unify(formula, if_false) }
+
+      specify { expect(state).to be_nil }
+    end
+  end
+
+  describe do
+    let(:if_true) { parse('(if true then _t₂ else _t₃) → _t₂') }
+    let(:if_false) { parse('(if false then _t₂ else _t₃) → _t₃') }
+    let(:formula) { parse('(if false then false else true) → _result') }
+
+    describe do
+      let(:state) { State.new.unify(formula, if_true) }
+
+      specify { expect(state).to be_nil }
+    end
+
+    describe do
+      let(:state) { State.new.unify(formula, if_false) }
+
+      specify { expect(state.value_of(if_false.find_variable('t₂'))).to look_like 'false' }
+      specify { expect(state.value_of(if_false.find_variable('t₃'))).to look_like 'true' }
+      specify { expect(state.value_of(formula.find_variable('result'))).to look_like 'true' }
+    end
   end
 end
