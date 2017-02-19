@@ -55,7 +55,7 @@ class Parser
       parse_numeric_operation
     elsif can_read? %r{[[:upper:]]+}
       parse_constant
-    elsif can_read? %r{[\p{L}\p{N}]+\p{Po}*}
+    elsif can_read? %r{_[^\p{Blank}()]+}
       parse_variable
     else
       complain
@@ -134,7 +134,8 @@ class Parser
   end
 
   def read_name
-    read %r{[\p{L}\p{N}]+\p{Po}*}
+    read %r{_}
+    read %r{[^\p{Blank}()]+}
   end
 
   def can_read?(pattern)
