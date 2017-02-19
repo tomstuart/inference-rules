@@ -11,19 +11,23 @@ RSpec.describe do
   include PrettyPrintingMatchers
   include RuleHelpers
 
-  let(:boolean_rules) {
+  let(:boolean_syntax) {
     [
       rule([], 'true ∈ T'),
       rule([], 'false ∈ T'),
-      rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T'),
+      rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T')
+    ]
+  }
 
+  let(:boolean_semantics) {
+    [
       rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if true then _t₂ else _t₃) → _t₂'),
       rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if false then _t₂ else _t₃) → _t₃'),
       rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')
     ]
   }
 
-  let(:arithmetic_rules) {
+  let(:arithmetic_syntax) {
     [
       rule([], '0 ∈ T'),
       rule(['_t₁ ∈ T'], '(succ _t₁) ∈ T'),
@@ -31,8 +35,12 @@ RSpec.describe do
       rule(['_t₁ ∈ T'], '(iszero _t₁) ∈ T'),
 
       rule([], '0 ∈ NV'),
-      rule(['_nv₁ ∈ NV'], '(succ _nv₁) ∈ NV'),
+      rule(['_nv₁ ∈ NV'], '(succ _nv₁) ∈ NV')
+    ]
+  }
 
+  let(:arithmetic_semantics) {
+    [
       rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(succ _t₁) → (succ _t₁′)'),
       rule([], '(pred 0) → 0'),
       rule(['_nv₁ ∈ NV'], '(pred (succ _nv₁)) → _nv₁'),
@@ -70,7 +78,7 @@ RSpec.describe do
   end
 
   describe 'boolean' do
-    let(:definition) { Definition.new(boolean_rules) }
+    let(:definition) { Definition.new(boolean_syntax + boolean_semantics) }
 
     describe 'matching' do
       specify do
@@ -175,7 +183,7 @@ RSpec.describe do
   end
 
   describe 'arithmetic' do
-    let(:definition) { Definition.new(boolean_rules + arithmetic_rules) }
+    let(:definition) { Definition.new(boolean_syntax + boolean_semantics + arithmetic_syntax + arithmetic_semantics) }
 
     describe 'evaluating' do
       matcher :evaluate_to do |expected|
