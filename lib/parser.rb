@@ -46,7 +46,7 @@ class Parser
     elsif can_read? %r{_}
       parse_variable
     elsif can_read? %r{[^\p{Blank}()]+}
-      parse_symbol
+      parse_word
     else
       complain
     end
@@ -64,16 +64,16 @@ class Parser
     builder.build_variable(read_name)
   end
 
-  def parse_symbol
-    builder.build_symbol(read_symbol)
+  def parse_word
+    builder.build_word(read_word)
   end
 
   def read_name
     read %r{_}
-    read_symbol
+    read_word
   end
 
-  def read_symbol
+  def read_word
     read %r{[^\p{Blank}()]+}
   end
 

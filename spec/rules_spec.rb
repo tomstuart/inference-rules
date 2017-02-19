@@ -4,6 +4,7 @@ require 'parser'
 require 'rule'
 require 'state'
 require 'variable'
+require 'word'
 
 RSpec.describe do
   specify do
@@ -22,23 +23,25 @@ RSpec.describe do
       Rule.new(premises.map(&parser.method(:parse)), parser.parse(conclusion))
     end
 
-    def symbol(name)
-      Builder.new.build_symbol(name)
+    def word(name)
+      Builder.new.build_word(name)
     end
 
     def evaluates(before, after)
-      Builder.new.build_formula([before, symbol('→'), after])
+      Builder.new.build_formula([before, word('→'), after])
     end
 
     def find_variable(formula, name)
       case formula
-      when Variable
-        formula if formula.name == name
       when Formula
         formula.parts.each do |part|
           result = find_variable(part, name)
           return result if result
         end
+        nil
+      when Variable
+        formula if formula.name == name
+      when Word
         nil
       end
     end

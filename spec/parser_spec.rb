@@ -13,23 +13,23 @@ RSpec.describe do
       Parser.parse(string)
     end
 
-    def symbol(name)
-      Builder.new.build_symbol(name)
+    def word(name)
+      Builder.new.build_word(name)
     end
 
     def yes
-      symbol('true')
+      word('true')
     end
 
     def no
-      symbol('false')
+      word('false')
     end
 
     def conditional(condition, consequent, alternative)
       Builder.new.build_formula([
-        symbol('if'),   condition,
-        symbol('then'), consequent,
-        symbol('else'), alternative
+        word('if'),   condition,
+        word('then'), consequent,
+        word('else'), alternative
       ])
     end
 
