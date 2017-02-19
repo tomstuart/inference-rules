@@ -1,9 +1,7 @@
 class Rule
   def initialize(premises, conclusion)
-    @premises, @conclusion = premises, conclusion
+    self.premises, self.conclusion = premises, conclusion
   end
-
-  attr_reader :premises, :conclusion
 
   def to_s
     premises_string = premises.map(&:to_s).join('  ')
@@ -17,10 +15,15 @@ class Rule
   end
 
   def match(expression, state)
-    state.unify(expression, conclusion)
+    next_state = state.unify(expression, conclusion)
+    [next_state, premises] if next_state
   end
 
   def matches?(*args)
     !match(*args).nil?
   end
+
+  private
+
+  attr_accessor :premises, :conclusion
 end

@@ -59,30 +59,33 @@ RSpec.describe do
       rules.
         map { |rule| rule.call(Builder.new) }.
         select { |rule| rule.matches?(expression, state) }.
-        map { |rule| [rule, rule.match(expression, state)] }
+        map { |rule| rule.match(expression, state) }
     end
 
     formula = parse('(if false then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if false then' }
+    expect(matches.length).to eq 2
+    state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
     state = State.new
     matches = match_rules(rules, formula, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if _t₁ then' }
+    expect(matches.length).to eq 1
+    state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if _t₁′ then false else true'
-    expect(rule.premises.length).to eq 5
-    premise = rule.premises.first
+    expect(premises.length).to eq 5
+    premise = premises.first
     matches = match_rules(rules, premise, state)
-    rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? '(if true then' }
+    expect(matches.length).to eq 2
+    state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
-    expect(rule.premises.length).to eq 2
+    expect(premises.length).to eq 2
 
     def derive(rules, expression, state)
-      match_rules(rules, expression, state).flat_map { |rule, state|
-        rule.premises.inject([state]) { |states, premise|
+      match_rules(rules, expression, state).flat_map { |state, premises|
+        premises.inject([state]) { |states, premise|
           states.flat_map { |state| derive(rules, premise, state) }
         }
       }.compact
