@@ -7,9 +7,13 @@ RSpec.describe do
   include ParserHelpers
   include PrettyPrintingMatchers
 
+  def unify(a, b)
+    State.new.unify(a, b)
+  end
+
   describe do
     let(:term) { parse('_t₁') }
-    let(:state) { State.new.unify(term, parse('true')) }
+    let(:state) { unify(term, parse('true')) }
 
     specify { expect(state.value_of(term.find_variable('t₁'))).to look_like 'true' }
   end
@@ -17,7 +21,7 @@ RSpec.describe do
   describe do
     let(:term₁) { parse('_t₁') }
     let(:term₂) { parse('_t₂') }
-    let(:state) { State.new.unify(term₂, parse('false')).unify(term₂, term₁) }
+    let(:state) { unify(term₂, parse('false')).unify(term₂, term₁) }
 
     specify { expect(state.value_of(term₁.find_variable('t₁'))).to look_like 'false' }
   end
@@ -28,7 +32,7 @@ RSpec.describe do
     let(:formula) { parse('(if true then false else true) → _result') }
 
     describe do
-      let(:state) { State.new.unify(formula, if_true) }
+      let(:state) { unify(formula, if_true) }
 
       specify { expect(state.value_of(if_true.find_variable('t₂'))).to look_like 'false' }
       specify { expect(state.value_of(if_true.find_variable('t₃'))).to look_like 'true' }
@@ -36,7 +40,7 @@ RSpec.describe do
     end
 
     describe do
-      let(:state) { State.new.unify(formula, if_false) }
+      let(:state) { unify(formula, if_false) }
 
       specify { expect(state).to be_nil }
     end
@@ -48,13 +52,13 @@ RSpec.describe do
     let(:formula) { parse('(if false then false else true) → _result') }
 
     describe do
-      let(:state) { State.new.unify(formula, if_true) }
+      let(:state) { unify(formula, if_true) }
 
       specify { expect(state).to be_nil }
     end
 
     describe do
-      let(:state) { State.new.unify(formula, if_false) }
+      let(:state) { unify(formula, if_false) }
 
       specify { expect(state.value_of(if_false.find_variable('t₂'))).to look_like 'false' }
       specify { expect(state.value_of(if_false.find_variable('t₃'))).to look_like 'true' }
