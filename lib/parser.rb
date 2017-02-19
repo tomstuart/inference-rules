@@ -1,3 +1,5 @@
+require 'ast/builder'
+
 class Parser
   def parse(string)
     self.string = string
@@ -5,7 +7,7 @@ class Parser
   end
 
   def self.parse(string)
-    self.new.parse(string)
+    self.new.parse(string).call(AST::Builder.new)
   end
 
   private
