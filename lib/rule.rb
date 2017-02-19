@@ -17,10 +17,12 @@ class Rule
     ].compact.join("\n")
   end
 
+  Match = Struct.new(:premises, :state)
+
   def match(expression, state)
     builder = Builder.new
     next_state = state.unify(expression, conclusion.call(builder))
-    [premises.map { |p| p.call(builder) }, next_state] if next_state
+    Match.new(premises.map { |p| p.call(builder) }, next_state) if next_state
   end
 
   private
