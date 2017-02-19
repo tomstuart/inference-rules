@@ -55,21 +55,17 @@ class Parser
   end
 
   def parse_variable
+    read %r{_}
     name = read_name
     -> builder { builder.build_variable(name) }
   end
 
   def parse_word
-    name = read_word
+    name = read_name
     -> builder { builder.build_word(name) }
   end
 
   def read_name
-    read %r{_}
-    read_word
-  end
-
-  def read_word
     read %r{[^\p{Blank}()]+}
   end
 
