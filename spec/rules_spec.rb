@@ -14,13 +14,13 @@ RSpec.describe do
     end
 
     def parse(string)
-      Parser.new(Builder.new).parse(string)
+      Parser.parse(string)
     end
 
     def parse_rule(premise_strings, conclusion_string)
-      builder = Builder.new
-      premises = premise_strings.map { |string| Parser.new(builder).parse(string) }
-      conclusion = Parser.new(builder).parse(conclusion_string)
+      parser = Parser.new
+      premises = premise_strings.map(&parser.method(:parse))
+      conclusion = parser.parse(conclusion_string)
 
       Rule.new(premises, conclusion)
     end

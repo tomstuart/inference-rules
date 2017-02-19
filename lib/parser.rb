@@ -1,6 +1,8 @@
+require 'builder'
+
 class Parser
-  def initialize(builder)
-    @builder = builder
+  def initialize(builder = Builder.new)
+    self.builder = builder
   end
 
   def parse(string)
@@ -8,9 +10,14 @@ class Parser
     parse_everything
   end
 
+  def self.parse(string)
+    self.new.parse(string)
+  end
+
   private
 
-  attr_reader :builder, :string
+  attr_accessor :builder
+  attr_reader :string
 
   def string=(string)
     @string = string.strip
