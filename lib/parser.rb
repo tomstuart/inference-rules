@@ -1,10 +1,4 @@
-require 'builder'
-
 class Parser
-  def initialize(builder = Builder.new)
-    self.builder = builder
-  end
-
   def parse(string)
     self.string = string
     parse_everything
@@ -16,7 +10,6 @@ class Parser
 
   private
 
-  attr_accessor :builder
   attr_reader :string
 
   def string=(string)
@@ -37,7 +30,7 @@ class Parser
     if expressions.length == 1
       expressions.first
     else
-      builder.build_sequence(expressions)
+      -> builder { builder.build_sequence(expressions.map { |e| e.call(builder) }) }
     end
   end
 
@@ -62,11 +55,13 @@ class Parser
   end
 
   def parse_variable
-    builder.build_variable(read_name)
+    name = read_name
+    -> builder { builder.build_variable(name) }
   end
 
   def parse_word
-    builder.build_word(read_word)
+    name = read_word
+    -> builder { builder.build_word(name) }
   end
 
   def read_name
