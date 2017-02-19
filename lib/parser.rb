@@ -24,23 +24,23 @@ class Parser
   end
 
   def parse_everything
-    term = parse_term
+    expression = parse_sequence
     complain unless string.empty?
-    term
+    expression
   end
 
-  def parse_term
-    atoms = []
-    atoms << parse_atom until can_read? %r{\)|\z}
+  def parse_sequence
+    expressions = []
+    expressions << parse_expression until can_read? %r{\)|\z}
 
-    if atoms.length == 1
-      atoms.first
+    if expressions.length == 1
+      expressions.first
     else
-      builder.build_sequence(atoms)
+      builder.build_sequence(expressions)
     end
   end
 
-  def parse_atom
+  def parse_expression
     if can_read? %r{\(}
       parse_brackets
     elsif can_read? %r{_}
@@ -54,10 +54,10 @@ class Parser
 
   def parse_brackets
     read %r{\(}
-    term = parse_term
+    expression = parse_sequence
     read %r{\)}
 
-    term
+    expression
   end
 
   def parse_variable

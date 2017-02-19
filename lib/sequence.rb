@@ -1,10 +1,10 @@
-require 'atom'
+require 'expression'
 
-class Sequence < Struct.new(:parts)
-  include Atom
+class Sequence < Struct.new(:expressions)
+  include Expression
 
   def to_s
-    parts.map(&:bracketed).join(' ')
+    expressions.map(&:bracketed).join(' ')
   end
 
   def bracketed
@@ -12,8 +12,8 @@ class Sequence < Struct.new(:parts)
   end
 
   def find_variable(name)
-    parts.each do |part|
-      result = part.find_variable(name)
+    expressions.each do |expression|
+      result = expression.find_variable(name)
       return result if result
     end
 

@@ -13,7 +13,7 @@ class State
     if values.has_key?(key)
       value_of values.fetch(key)
     elsif key.is_a?(Sequence)
-      Sequence.new(key.parts.map(&method(:value_of)))
+      Sequence.new(key.expressions.map(&method(:value_of)))
     else
       key
     end
@@ -29,8 +29,8 @@ class State
     elsif b.is_a?(Variable)
       assign_values b => a
     elsif a.is_a?(Sequence) && b.is_a?(Sequence)
-      if a.parts.length == b.parts.length
-        [a, b].map(&:parts).transpose.inject(self) do |state, (a, b)|
+      if a.expressions.length == b.expressions.length
+        [a, b].map(&:expressions).transpose.inject(self) do |state, (a, b)|
           state && state.unify(a, b)
         end
       end

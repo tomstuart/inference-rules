@@ -1,4 +1,4 @@
-module Atom
+module Expression
   def inspect
     "«#{to_s}»"
   end

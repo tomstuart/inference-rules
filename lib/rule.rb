@@ -16,8 +16,8 @@ class Rule
     ].compact.join("\n")
   end
 
-  def match(formula, state)
-    state.unify(formula, conclusion)
+  def match(expression, state)
+    state.unify(expression, conclusion)
   end
 
   def matches?(*args)

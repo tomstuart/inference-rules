@@ -1,7 +1,7 @@
-require 'atom'
+require 'expression'
 
 class Variable < Struct.new(:name, :scope)
-  include Atom
+  include Expression
 
   def to_s
     "_#{name}"

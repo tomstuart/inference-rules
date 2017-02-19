@@ -1,7 +1,7 @@
-require 'atom'
+require 'expression'
 
 class Word < Struct.new(:name)
-  include Atom
+  include Expression
 
   def to_s
     name

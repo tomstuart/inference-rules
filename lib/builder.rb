@@ -7,8 +7,8 @@ class Builder
     self.scope = scope
   end
 
-  def build_sequence(parts)
-    Sequence.new(parts)
+  def build_sequence(expressions)
+    Sequence.new(expressions)
   end
 
   def build_variable(name)
