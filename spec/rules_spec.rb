@@ -24,8 +24,12 @@ RSpec.describe do
       Builder.new.build_word(name)
     end
 
+    def sequence(*expressions)
+      Builder.new.build_sequence(expressions)
+    end
+
     def evaluates(before, after)
-      Builder.new.build_sequence([before, word('→'), after])
+      sequence(before, word('→'), after)
     end
 
     term = parse('_t₁')

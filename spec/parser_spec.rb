@@ -25,12 +25,16 @@ RSpec.describe do
       word('false')
     end
 
+    def sequence(*expressions)
+      Builder.new.build_sequence(expressions)
+    end
+
     def conditional(condition, consequent, alternative)
-      Builder.new.build_sequence([
+      sequence(
         word('if'),   condition,
         word('then'), consequent,
         word('else'), alternative
-      ])
+      )
     end
 
     expect(parse('true')).to eq yes
