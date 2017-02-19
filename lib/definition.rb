@@ -10,7 +10,7 @@ class Definition
   end
 
   def derive(expression, state = State.new)
-    match_rules(expression, state).flat_map { |state, premises|
+    match_rules(expression, state).flat_map { |premises, state|
       premises.inject([state]) { |states, premise|
         states.flat_map { |state| derive(premise, state) }
       }

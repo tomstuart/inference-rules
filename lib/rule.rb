@@ -20,7 +20,7 @@ class Rule
   def match(expression, state)
     builder = Builder.new
     next_state = state.unify(expression, conclusion.call(builder))
-    [next_state, premises.map { |p| p.call(builder) }] if next_state
+    [premises.map { |p| p.call(builder) }, next_state] if next_state
   end
 
   private

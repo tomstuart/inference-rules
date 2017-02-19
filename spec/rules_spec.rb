@@ -31,19 +31,19 @@ RSpec.describe do
     formula = parse('(if false then false else true) → _result')
     matches = definition.match_rules(formula)
     expect(matches.length).to eq 2
-    state, premises = matches.first
+    premises, state = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
     matches = definition.match_rules(formula)
     expect(matches.length).to eq 1
-    state, premises = matches.first
+    premises, state = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if _t₁′ then false else true'
     expect(premises.length).to eq 5
     premise = premises.first
     matches = definition.match_rules(premise, state)
     expect(matches.length).to eq 2
-    state, premises = matches.first
+    premises, state = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
     expect(premises.length).to eq 2
 
