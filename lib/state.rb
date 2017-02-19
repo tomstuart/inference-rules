@@ -12,8 +12,8 @@ class State
   def value_of(key)
     if values.has_key?(key)
       value_of values.fetch(key)
-    elsif key.is_a?(Formula)
-      Formula.new(key.parts.map(&method(:value_of)))
+    elsif key.is_a?(Sequence)
+      Sequence.new(key.parts.map(&method(:value_of)))
     else
       key
     end
@@ -28,7 +28,7 @@ class State
       assign_values a => b
     elsif b.is_a?(Variable)
       assign_values b => a
-    elsif a.is_a?(Formula) && b.is_a?(Formula)
+    elsif a.is_a?(Sequence) && b.is_a?(Sequence)
       if a.parts.length == b.parts.length
         [a, b].map(&:parts).transpose.inject(self) do |state, (a, b)|
           state && state.unify(a, b)

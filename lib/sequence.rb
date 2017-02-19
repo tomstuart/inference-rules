@@ -1,6 +1,6 @@
 require 'atom'
 
-class Formula < Struct.new(:parts)
+class Sequence < Struct.new(:parts)
   include Atom
 
   def to_s

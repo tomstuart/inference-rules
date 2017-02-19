@@ -26,7 +26,7 @@ RSpec.describe do
     end
 
     def conditional(condition, consequent, alternative)
-      Builder.new.build_formula([
+      Builder.new.build_sequence([
         word('if'),   condition,
         word('then'), consequent,
         word('else'), alternative

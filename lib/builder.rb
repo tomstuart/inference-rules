@@ -1,4 +1,4 @@
-require 'formula'
+require 'sequence'
 require 'variable'
 require 'word'
 
@@ -7,8 +7,8 @@ class Builder
     self.scope = scope
   end
 
-  def build_formula(parts)
-    Formula.new(parts)
+  def build_sequence(parts)
+    Sequence.new(parts)
   end
 
   def build_variable(name)

@@ -36,7 +36,7 @@ class Parser
     if atoms.length == 1
       atoms.first
     else
-      builder.build_formula(atoms)
+      builder.build_sequence(atoms)
     end
   end
 

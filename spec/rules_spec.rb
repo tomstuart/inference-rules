@@ -25,7 +25,7 @@ RSpec.describe do
     end
 
     def evaluates(before, after)
-      Builder.new.build_formula([before, word('→'), after])
+      Builder.new.build_sequence([before, word('→'), after])
     end
 
     term = parse('_t₁')
