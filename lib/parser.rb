@@ -25,7 +25,8 @@ class Parser
 
   def parse_everything
     expression = parse_sequence
-    complain unless string.empty?
+    read %r{\z}
+
     expression
   end
 
