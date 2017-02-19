@@ -47,13 +47,13 @@ RSpec.describe do
 
     expect(parse_term('true')).to eq yes
     expect(parse_term('if false then false else true')).to eq conditional(no, no, yes)
-    expect(parse_term('if if true then true else false then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
+    expect(parse_term('if (if true then true else false) then false else true')).to eq conditional(conditional(yes, yes, no), no, yes)
 
-    expect(parse_formula('if true then t₂ else t₃ → t₂')).to look_like 'if true then t₂ else t₃ → t₂'
-    expect(parse_formula('if false then t₂ else t₃ → t₃')).to look_like 'if false then t₂ else t₃ → t₃'
+    expect(parse_formula('(if true then t₂ else t₃) → t₂')).to look_like 'if true then t₂ else t₃ → t₂'
+    expect(parse_formula('(if false then t₂ else t₃) → t₃')).to look_like 'if false then t₂ else t₃ → t₃'
 
     expect(parse_formula('t₁ → t₁′')).to look_like 't₁ → t₁′'
-    expect(parse_formula('if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
+    expect(parse_formula('(if t₁ then t₂ else t₃) → (if t₁′ then t₂ else t₃)')).to look_like 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃'
 
     def find_variable(formula, name)
       case formula
@@ -77,9 +77,9 @@ RSpec.describe do
     state = State.new.unify(term₂, parse_term('false')).unify(term₂, term₁)
     expect(state.value_of(find_variable(term₁, 't₁'))).to look_like 'false'
 
-    if_true = parse_formula('if true then t₂ else t₃ → t₂')
-    if_false = parse_formula('if false then t₂ else t₃ → t₃')
-    formula = parse_formula('if true then false else true → result')
+    if_true = parse_formula('(if true then t₂ else t₃) → t₂')
+    if_false = parse_formula('(if false then t₂ else t₃) → t₃')
+    formula = parse_formula('(if true then false else true) → result')
     state = State.new.unify(formula, if_true)
     expect(state.value_of(find_variable(if_true, 't₂'))).to look_like 'false'
     expect(state.value_of(find_variable(if_true, 't₃'))).to look_like 'true'
@@ -87,9 +87,9 @@ RSpec.describe do
     state = State.new.unify(formula, if_false)
     expect(state).to be_nil
 
-    if_true = parse_formula('if true then t₂ else t₃ → t₂')
-    if_false = parse_formula('if false then t₂ else t₃ → t₃')
-    formula = parse_formula('if false then false else true → result')
+    if_true = parse_formula('(if true then t₂ else t₃) → t₂')
+    if_false = parse_formula('(if false then t₂ else t₃) → t₃')
+    formula = parse_formula('(if false then false else true) → result')
     state = State.new.unify(formula, if_true)
     expect(state).to be_nil
     state = State.new.unify(formula, if_false)
@@ -100,11 +100,11 @@ RSpec.describe do
     rules = [
       -> { parse_rule([], 'true ∈ T') },
       -> { parse_rule([], 'false ∈ T') },
-      -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], 'if t₁ then t₂ else t₃ ∈ T') },
+      -> { parse_rule(['t₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T'], '(if t₁ then t₂ else t₃) ∈ T') },
 
-      -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], 'if true then t₂ else t₃ → t₂') },
-      -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], 'if false then t₂ else t₃ → t₃') },
-      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T', 't₁′ ∈ T'], 'if t₁ then t₂ else t₃ → if t₁′ then t₂ else t₃') }
+      -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], '(if true then t₂ else t₃) → t₂') },
+      -> { parse_rule(['t₂ ∈ T', 't₃ ∈ T'], '(if false then t₂ else t₃) → t₃') },
+      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₂ ∈ T', 't₃ ∈ T', 't₁′ ∈ T'], '(if t₁ then t₂ else t₃) → (if t₁′ then t₂ else t₃)') }
     ]
 
     def match_rules(rules, formula, state)
@@ -114,13 +114,13 @@ RSpec.describe do
         map { |rule| [rule, rule.match(formula, state)] }
     end
 
-    formula = parse_formula('if false then false else true → result')
+    formula = parse_formula('(if false then false else true) → result')
     state = State.new
     matches = match_rules(rules, formula, state)
     rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if false then' }
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
-    formula = parse_formula('if if true then true else false then false else true → result')
+    formula = parse_formula('(if (if true then true else false) then false else true) → result')
     state = State.new
     matches = match_rules(rules, formula, state)
     rule, state = matches.detect { |rule, _| rule.conclusion.to_s.start_with? 'if t₁ then' }
@@ -140,13 +140,13 @@ RSpec.describe do
       }.compact
     end
 
-    formula = parse_formula('if false then false else true → result')
+    formula = parse_formula('(if false then false else true) → result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'true'
 
-    formula = parse_formula('if if true then true else false then false else true → result')
+    formula = parse_formula('(if (if true then true else false) then false else true) → result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
@@ -157,7 +157,7 @@ RSpec.describe do
     state = states.first
     expect(state.value_of(find_variable(formula, 'result'))).to look_like 'false'
 
-    formula = parse_formula('if if if true then false else true then true else false then false else true → result')
+    formula = parse_formula('(if (if (if true then false else true) then true else false) then false else true) → result')
     states = derive(rules, formula, State.new)
     expect(states.length).to eq 1
     state = states.first
@@ -195,11 +195,11 @@ RSpec.describe do
 
     expect('if false then false else true').to reduce_to 'true'
 
-    expect('if if true then true else false then false else true').to reduce_to 'if true then false else true'
+    expect('if (if true then true else false) then false else true').to reduce_to 'if true then false else true'
     expect('if true then false else true').to reduce_to 'false'
 
-    expect('if if if true then false else true then true else false then false else true').to reduce_to 'if if false then true else false then false else true'
-    expect('if if false then true else false then false else true').to reduce_to 'if false then false else true'
+    expect('if (if (if true then false else true) then true else false) then false else true').to reduce_to 'if (if false then true else false) then false else true'
+    expect('if (if false then true else false) then false else true').to reduce_to 'if false then false else true'
     expect('if false then false else true').to reduce_to 'true'
 
     def evaluate(rules, term)
@@ -222,34 +222,34 @@ RSpec.describe do
     end
 
     expect('if false then false else true').to evaluate_to 'true'
-    expect('if if true then true else false then false else true').to evaluate_to 'false'
-    expect('if if if true then false else true then true else false then false else true').to evaluate_to 'true'
+    expect('if (if true then true else false) then false else true').to evaluate_to 'false'
+    expect('if (if (if true then false else true) then true else false) then false else true').to evaluate_to 'true'
 
     rules += [
       -> { parse_rule([], '0 ∈ T') },
-      -> { parse_rule(['t₁ ∈ T'], 'succ t₁ ∈ T') },
-      -> { parse_rule(['t₁ ∈ T'], 'pred t₁ ∈ T') },
-      -> { parse_rule(['t₁ ∈ T'], 'iszero t₁ ∈ T') },
+      -> { parse_rule(['t₁ ∈ T'], '(succ t₁) ∈ T') },
+      -> { parse_rule(['t₁ ∈ T'], '(pred t₁) ∈ T') },
+      -> { parse_rule(['t₁ ∈ T'], '(iszero t₁) ∈ T') },
 
       -> { parse_rule([], '0 ∈ NV') },
-      -> { parse_rule(['nv₁ ∈ NV'], 'succ nv₁ ∈ NV') },
+      -> { parse_rule(['nv₁ ∈ NV'], '(succ nv₁) ∈ NV') },
 
-      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'succ t₁ → succ t₁′') },
-      -> { parse_rule([], 'pred 0 → 0') },
-      -> { parse_rule(['nv₁ ∈ NV'], 'pred succ nv₁ → nv₁') },
-      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'pred t₁ → pred t₁′') },
-      -> { parse_rule([], 'iszero 0 → true') },
-      -> { parse_rule(['nv₁ ∈ NV'], 'iszero succ nv₁ → false') },
-      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], 'iszero t₁ → iszero t₁′') }
+      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], '(succ t₁) → (succ t₁′)') },
+      -> { parse_rule([], '(pred 0) → 0') },
+      -> { parse_rule(['nv₁ ∈ NV'], '(pred (succ nv₁)) → nv₁') },
+      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], '(pred t₁) → (pred t₁′)') },
+      -> { parse_rule([], '(iszero 0) → true') },
+      -> { parse_rule(['nv₁ ∈ NV'], '(iszero (succ nv₁)) → false') },
+      -> { parse_rule(['t₁ → t₁′', 't₁ ∈ T', 't₁′ ∈ T'], '(iszero t₁) → (iszero t₁′)') }
     ]
 
-    expect('pred succ succ 0').to evaluate_to 'succ 0'
-    expect('if iszero succ 0 then succ pred 0 else pred succ 0').to evaluate_to '0'
-    expect('pred succ succ pred 0').to evaluate_to 'succ 0'
-    expect('pred succ succ true').to evaluate_to 'pred succ succ true'
+    expect('pred (succ (succ 0))').to evaluate_to 'succ 0'
+    expect('if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))').to evaluate_to '0'
+    expect('pred (succ (succ (pred 0)))').to evaluate_to 'succ 0'
+    expect('pred (succ (succ true))').to evaluate_to 'pred (succ (succ true))'
     expect('iszero 0').to evaluate_to 'true'
-    expect('iszero succ 0').to evaluate_to 'false'
-    expect('iszero succ succ succ succ 0').to evaluate_to 'false'
-    expect('iszero succ true').to evaluate_to 'iszero succ true'
+    expect('iszero (succ 0)').to evaluate_to 'false'
+    expect('iszero (succ (succ (succ (succ 0))))').to evaluate_to 'false'
+    expect('iszero (succ true)').to evaluate_to 'iszero (succ true)'
   end
 end

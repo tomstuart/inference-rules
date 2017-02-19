@@ -43,7 +43,9 @@ class Parser
   end
 
   def parse_term
-    if can_read? %r{if}
+    if can_read? %r{\(}
+      parse_brackets
+    elsif can_read? %r{if}
       parse_conditional
     elsif can_read? %r{true|false}
       parse_boolean
@@ -58,6 +60,14 @@ class Parser
     else
       complain
     end
+  end
+
+  def parse_brackets
+    read %r{\(}
+    term = parse_term
+    read %r{\)}
+
+    term
   end
 
   def parse_conditional
