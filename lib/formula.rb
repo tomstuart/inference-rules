@@ -10,4 +10,13 @@ class Formula < Struct.new(:parts)
   def bracketed
     "(#{to_s})"
   end
+
+  def find_variable(name)
+    parts.each do |part|
+      result = part.find_variable(name)
+      return result if result
+    end
+
+    nil
+  end
 end

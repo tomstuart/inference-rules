@@ -6,4 +6,8 @@ class Word < Struct.new(:name)
   def to_s
     name
   end
+
+  def find_variable(name)
+    nil
+  end
 end
