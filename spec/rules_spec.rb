@@ -1,5 +1,4 @@
 require 'definition'
-require 'state'
 
 require 'support/builder_helpers'
 require 'support/parser_helpers'
@@ -49,34 +48,34 @@ RSpec.describe do
     expect(premises.length).to eq 2
 
     formula = parse('(if false then false else true) → _result')
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'false'
 
     formula = parse('(if (if (if true then false else true) then true else false) then false else true) → _result')
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if (if false then true else false) then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if false then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = definition.derive(formula, State.new)
+    states = definition.derive(formula)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
@@ -87,7 +86,7 @@ RSpec.describe do
     def eval1(definition, term)
       result = parse('_result')
       formula = evaluates(term, result)
-      states = definition.derive(formula, State.new)
+      states = definition.derive(formula)
 
       raise NoRuleApplies if states.empty?
       raise Nondeterministic, states.map { |s| s.value_of(result) } if states.length > 1

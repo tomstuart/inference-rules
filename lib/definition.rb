@@ -11,7 +11,7 @@ class Definition
       map { |rule| rule.match(expression, state) }
   end
 
-  def derive(expression, state)
+  def derive(expression, state = State.new)
     match_rules(expression, state).flat_map { |state, premises|
       premises.inject([state]) { |states, premise|
         states.flat_map { |state| derive(premise, state) }
