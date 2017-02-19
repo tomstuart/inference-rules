@@ -1,6 +1,6 @@
-require 'sequence'
-require 'variable'
-require 'word'
+require 'ast/sequence'
+require 'ast/variable'
+require 'ast/word'
 
 class Builder
   def initialize(scope = Object.new)
@@ -8,15 +8,15 @@ class Builder
   end
 
   def build_sequence(expressions)
-    Sequence.new(expressions)
+    AST::Sequence.new(expressions)
   end
 
   def build_variable(name)
-    Variable.new(name, scope)
+    AST::Variable.new(name, scope)
   end
 
   def build_word(name)
-    Word.new(name)
+    AST::Word.new(name)
   end
 
   private

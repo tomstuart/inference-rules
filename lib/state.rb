@@ -1,3 +1,6 @@
+require 'ast/sequence'
+require 'ast/variable'
+
 class State
   def initialize(values = {})
     @values = values
@@ -12,8 +15,8 @@ class State
   def value_of(key)
     if values.has_key?(key)
       value_of values.fetch(key)
-    elsif key.is_a?(Sequence)
-      Sequence.new(key.expressions.map(&method(:value_of)))
+    elsif key.is_a?(AST::Sequence)
+      AST::Sequence.new(key.expressions.map(&method(:value_of)))
     else
       key
     end
@@ -24,11 +27,11 @@ class State
 
     if a == b
       self
-    elsif a.is_a?(Variable)
+    elsif a.is_a?(AST::Variable)
       assign_values a => b
-    elsif b.is_a?(Variable)
+    elsif b.is_a?(AST::Variable)
       assign_values b => a
-    elsif a.is_a?(Sequence) && b.is_a?(Sequence)
+    elsif a.is_a?(AST::Sequence) && b.is_a?(AST::Sequence)
       if a.expressions.length == b.expressions.length
         [a, b].map(&:expressions).transpose.inject(self) do |state, (a, b)|
           state && state.unify(a, b)
