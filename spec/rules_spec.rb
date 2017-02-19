@@ -1,3 +1,4 @@
+require 'definition'
 require 'state'
 
 require 'support/builder_helpers'
@@ -26,70 +27,58 @@ RSpec.describe do
       rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')
     ]
 
-    def match_rules(rules, expression, state)
-      rules.
-        select { |rule| rule.matches?(expression, state) }.
-        map { |rule| rule.match(expression, state) }
-    end
+    definition = Definition.new(rules)
 
     formula = parse('(if false then false else true) → _result')
     state = State.new
-    matches = match_rules(rules, formula, state)
+    matches = definition.match_rules(formula, state)
     expect(matches.length).to eq 2
     state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
     state = State.new
-    matches = match_rules(rules, formula, state)
+    matches = definition.match_rules(formula, state)
     expect(matches.length).to eq 1
     state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if _t₁′ then false else true'
     expect(premises.length).to eq 5
     premise = premises.first
-    matches = match_rules(rules, premise, state)
+    matches = definition.match_rules(premise, state)
     expect(matches.length).to eq 2
     state, premises = matches.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
     expect(premises.length).to eq 2
 
-    def derive(rules, expression, state)
-      match_rules(rules, expression, state).flat_map { |state, premises|
-        premises.inject([state]) { |states, premise|
-          states.flat_map { |state| derive(rules, premise, state) }
-        }
-      }.compact
-    end
-
     formula = parse('(if false then false else true) → _result')
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
 
     formula = parse('(if (if true then true else false) then false else true) → _result')
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'false'
 
     formula = parse('(if (if (if true then false else true) then true else false) then false else true) → _result')
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if (if false then true else false) then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'if false then false else true'
     formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
-    states = derive(rules, formula, State.new)
+    states = definition.derive(formula, State.new)
     expect(states.length).to eq 1
     state = states.first
     expect(state.value_of(formula.find_variable('result'))).to look_like 'true'
@@ -97,10 +86,10 @@ RSpec.describe do
     NoRuleApplies = Class.new(StandardError)
     Nondeterministic = Class.new(StandardError)
 
-    def eval1(rules, term)
+    def eval1(definition, term)
       result = parse('_result')
       formula = evaluates(term, result)
-      states = derive(rules, formula, State.new)
+      states = definition.derive(formula, State.new)
 
       raise NoRuleApplies if states.empty?
       raise Nondeterministic, states.map { |s| s.value_of(result) } if states.length > 1
@@ -110,7 +99,7 @@ RSpec.describe do
 
     RSpec::Matchers.define :reduce_to do |expected|
       match do |actual|
-        eval1(rules, parse(actual)) == parse(expected)
+        eval1(definition, parse(actual)) == parse(expected)
       end
     end
 
@@ -123,9 +112,9 @@ RSpec.describe do
     expect('if (if false then true else false) then false else true').to reduce_to 'if false then false else true'
     expect('if false then false else true').to reduce_to 'true'
 
-    def evaluate(rules, term)
+    def evaluate(definition, term)
       begin
-        evaluate(rules, eval1(rules, term))
+        evaluate(definition, eval1(definition, term))
       rescue NoRuleApplies
         term
       end
@@ -133,7 +122,7 @@ RSpec.describe do
 
     RSpec::Matchers.define :evaluate_to do |expected|
       match do |actual|
-        @result = evaluate(rules, parse(actual))
+        @result = evaluate(definition, parse(actual))
         @result == parse(expected)
       end
 
@@ -163,6 +152,8 @@ RSpec.describe do
       rule(['_nv₁ ∈ NV'], '(iszero (succ _nv₁)) → false'),
       rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(iszero _t₁) → (iszero _t₁′)')
     ]
+
+    definition = Definition.new(rules)
 
     expect('pred (succ (succ 0))').to evaluate_to 'succ 0'
     expect('if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))').to evaluate_to '0'
