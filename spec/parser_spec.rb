@@ -6,23 +6,23 @@ RSpec.describe do
   include ParserHelpers
 
   def yes
-    word('true')
+    keyword('true')
   end
 
   def no
-    word('false')
+    keyword('false')
   end
 
   def conditional(condition, consequent, alternative)
     sequence(
-      word('if'),   condition,
-      word('then'), consequent,
-      word('else'), alternative
+      keyword('if'),   condition,
+      keyword('then'), consequent,
+      keyword('else'), alternative
     )
   end
 
   def evaluates(before, after)
-    sequence(before, word('→'), after)
+    sequence(before, keyword('→'), after)
   end
 
   describe 'without variables' do

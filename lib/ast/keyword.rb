@@ -1,7 +1,7 @@
 require 'ast/expression'
 
 module AST
-  class Word < Struct.new(:name)
+  class Keyword < Struct.new(:name)
     include Expression
 
     def to_s

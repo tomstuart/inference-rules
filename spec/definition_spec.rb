@@ -44,7 +44,7 @@ RSpec.describe do
   }
 
   def evaluates(before, after)
-    sequence(before, word('→'), after)
+    sequence(before, keyword('→'), after)
   end
 
   NoRuleApplies = Class.new(StandardError)

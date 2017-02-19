@@ -42,7 +42,7 @@ class Parser
     elsif can_read? %r{_}
       parse_variable
     elsif can_read? %r{[^\p{Blank}()]+}
-      parse_word
+      parse_keyword
     else
       complain
     end
@@ -62,9 +62,9 @@ class Parser
     -> builder { builder.build_variable(name) }
   end
 
-  def parse_word
+  def parse_keyword
     name = read_name
-    -> builder { builder.build_word(name) }
+    -> builder { builder.build_keyword(name) }
   end
 
   def read_name

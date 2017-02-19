@@ -1,11 +1,15 @@
+require 'ast/keyword'
 require 'ast/sequence'
 require 'ast/variable'
-require 'ast/word'
 
 module AST
   class Builder
     def initialize(scope = Object.new)
       self.scope = scope
+    end
+
+    def build_keyword(name)
+      Keyword.new(name)
     end
 
     def build_sequence(expressions)
@@ -14,10 +18,6 @@ module AST
 
     def build_variable(name)
       Variable.new(name, scope)
-    end
-
-    def build_word(name)
-      Word.new(name)
     end
 
     private
