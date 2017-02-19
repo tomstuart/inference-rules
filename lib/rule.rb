@@ -1,4 +1,4 @@
-require 'builder'
+require 'ast/builder'
 
 class Rule
   def initialize(premises, conclusion)
@@ -6,7 +6,7 @@ class Rule
   end
 
   def to_s
-    builder = Builder.new
+    builder = AST::Builder.new
     premises_string = premises.map { |p| p.call(builder).to_s }.join('  ')
     conclusion_string = conclusion.call(builder).to_s
 
@@ -26,7 +26,7 @@ class Rule
   end
 
   def match(expression, state)
-    builder = Builder.new
+    builder = AST::Builder.new
     next_state = state.unify(expression, conclusion.call(builder))
     Match.new(premises.map { |p| p.call(builder) }, next_state) if next_state
   end
