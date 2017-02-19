@@ -1,33 +1,17 @@
-require 'builder'
-require 'parser'
-require 'rule'
 require 'state'
 
+require 'support/builder_helpers'
+require 'support/parser_helpers'
+require 'support/pretty_printing_matchers'
+require 'support/rule_helpers'
+
 RSpec.describe do
+  include BuilderHelpers
+  include ParserHelpers
+  include PrettyPrintingMatchers
+  include RuleHelpers
+
   specify do
-    RSpec::Matchers.define :look_like do |expected|
-      match do |actual|
-        actual.to_s == expected
-      end
-    end
-
-    def parse(string)
-      Parser.parse(string)
-    end
-
-    def rule(premises, conclusion)
-      parser = Parser.new
-      Rule.new(premises.map(&parser.method(:parse)), parser.parse(conclusion))
-    end
-
-    def word(name)
-      Builder.new.build_word(name)
-    end
-
-    def sequence(*expressions)
-      Builder.new.build_sequence(expressions)
-    end
-
     def evaluates(before, after)
       sequence(before, word('→'), after)
     end

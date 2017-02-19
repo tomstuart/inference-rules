@@ -1,32 +1,19 @@
-require 'builder'
-require 'parser'
+require 'support/builder_helpers'
+require 'support/parser_helpers'
+require 'support/pretty_printing_matchers'
 
 RSpec.describe do
+  include BuilderHelpers
+  include ParserHelpers
+  include PrettyPrintingMatchers
+
   specify do
-    RSpec::Matchers.define :look_like do |expected|
-      match do |actual|
-        actual.to_s == expected
-      end
-    end
-
-    def parse(string)
-      Parser.parse(string)
-    end
-
-    def word(name)
-      Builder.new.build_word(name)
-    end
-
     def yes
       word('true')
     end
 
     def no
       word('false')
-    end
-
-    def sequence(*expressions)
-      Builder.new.build_sequence(expressions)
     end
 
     def conditional(condition, consequent, alternative)
