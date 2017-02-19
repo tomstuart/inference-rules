@@ -50,6 +50,10 @@ class Builder
     Variable.new(name, scope)
   end
 
+  def build_symbol(name)
+    name.to_sym
+  end
+
   private
 
   attr_accessor :scope
