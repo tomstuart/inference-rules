@@ -17,7 +17,13 @@ class Rule
     ].compact.join("\n")
   end
 
-  Match = Struct.new(:premises, :state)
+  Match = Struct.new(:premises, :state) do
+    def try_premises
+      premises.inject([state]) { |states, premise|
+        states.flat_map { |state| yield(premise, state) }
+      }
+    end
+  end
 
   def match(expression, state)
     builder = Builder.new
