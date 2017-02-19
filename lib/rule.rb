@@ -1,11 +1,14 @@
+require 'builder'
+
 class Rule
   def initialize(premises, conclusion)
     self.premises, self.conclusion = premises, conclusion
   end
 
   def to_s
-    premises_string = premises.map(&:to_s).join('  ')
-    conclusion_string = conclusion.to_s
+    builder = Builder.new
+    premises_string = premises.map { |p| p.call(builder).to_s }.join('  ')
+    conclusion_string = conclusion.call(builder).to_s
 
     [
       (premises_string unless premises_string.empty?),
@@ -15,8 +18,9 @@ class Rule
   end
 
   def match(expression, state)
-    next_state = state.unify(expression, conclusion)
-    [next_state, premises] if next_state
+    builder = Builder.new
+    next_state = state.unify(expression, conclusion.call(builder))
+    [next_state, premises.map { |p| p.call(builder) }] if next_state
   end
 
   def matches?(*args)

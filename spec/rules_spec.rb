@@ -57,7 +57,6 @@ RSpec.describe do
 
     def match_rules(rules, expression, state)
       rules.
-        map { |rule| rule.call(Builder.new) }.
         select { |rule| rule.matches?(expression, state) }.
         map { |rule| rule.match(expression, state) }
     end
