@@ -1,3 +1,48 @@
+# Inference rules
+
+This is an attempt at an implementation of [inference
+rules](https://en.wikipedia.org/wiki/Rule_of_inference), specifically for the
+purpose of being able to evaluate the languages in Chapter 3 of [Types and
+Programming Languages](https://www.cis.upenn.edu/~bcpierce/tapl/).
+
+The approach is to write the premises and conclusion of each inference rule in
+a simple, generic [metalanguage](https://en.wikipedia.org/wiki/Metalanguage):
+
+* anything that starts with an underscore is a metavariable;
+* anything in brackets is a nested expression; and
+* anything else is a (whitespace-delimited) keyword.
+
+This doesn’t assume anything in particular about the [object
+language](https://en.wikipedia.org/wiki/Object_language) that the rules are
+describing, except that it’s whitespace-delimited and brackets are its only
+nesting construct, which are probably acceptable constraints for a toy
+language.
+
+For example: the language of boolean expressions from TAPL Chapter 3 has terms
+like `if … then … else …`, but our metalanguage doesn’t care about that
+structure — it just recognises that `if`, `then` and `else` are keywords. The
+downside is that if we want to write a nested boolean expression we have to say
+`if (if … then … else …) then … else …` so that the parser knows where the
+nesting happens.
+
+Likewise the relation symbols in the rules (e.g. `∈` and `→`, for syntactic
+validity and single-step evaluation respectively) don’t have any meaning beyond
+just being non-ASCII keywords in the notional language of formulae.
+
+The code in this repository does the work of parsing this syntax and
+recursively building derivations of the resulting rules. The upshot is that you
+can write a bunch of rules describing some language and then apply those rules
+to some expression in that language to see if the derivation can assign values
+to any of its metavariables. If that expression is, for example, `iszero (succ
+0) → _t′`, the code could (given the right rules) build a derivation that
+assigns `false` to `_t′`.
+
+All of the above is wrapped up in a nice `Relation` class: you give it the name
+and rules of the relation, and then you can just ask it to apply the defined
+relation `once` (or `many` times) to a particular “input”.
+
+Here’s what it looks like in practice:
+
 ```irb
 $ irb -Ilib -rparser -rrelation
 >> BOOLEAN_SYNTAX =
