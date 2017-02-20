@@ -33,8 +33,8 @@ The code in this repository does the work of parsing this syntax and
 recursively building derivations of the resulting rules. The upshot is that you
 can write a bunch of rules describing some language and then apply those rules
 to some expression in that language to see if the derivation can assign values
-to any of its metavariables. If that expression is, for example, `iszero (succ
-0) → _t′`, the code could (given the right rules) build a derivation that
+to any of its metavariables. If that expression is, for example, `(iszero (succ
+0)) → _t′`, the code could (given the right rules) build a derivation that
 assigns `false` to `_t′`.
 
 All of the above is wrapped up in a nice `Relation` class: you give it the name
