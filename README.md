@@ -39,7 +39,12 @@ assigns `false` to `_t′`.
 
 All of the above is wrapped up in a nice `Relation` class: you give it the name
 and rules of the relation, and then you can just ask it to apply the defined
-relation `once` (or `many` times) to a particular “input”.
+relation `once` (or `many` times) to a particular “input”. Concretely, that
+means that if you make a `Relation` called “`→`” and ask for it to be applied
+to the input `iszero (succ 0)`, it will build the expression `(iszero (succ 0))
+→ _output` for you, build a derivation of that expression using the inference
+rules you provided, and then return the value that the derivation assigned to
+the `_output` metavariable.
 
 Here’s what it looks like in practice:
 
