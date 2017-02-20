@@ -1,8 +1,14 @@
+require 'parser'
 require 'ast/builder'
 
 class Rule
   def initialize(premises, conclusion)
     self.premises, self.conclusion = premises, conclusion
+  end
+
+  def self.define(premises: [], conclusion:)
+    parser = Parser.new
+    new(premises.map(&parser.method(:parse)), parser.parse(conclusion))
   end
 
   def to_s
