@@ -167,3 +167,10 @@ $ irb -Ilib -rparser -rrelation
 >> evaluate(term)
 => «0»
 ```
+
+Note that the metalanguage places no implicit syntactic constraints on
+metavariables — as far as the system is concerned, a metavariable called `_nv₁`
+can have any value whatsoever as long as all premises are satisfied. In the
+above semantics, important syntactic constraints (`_t₁ ∈ T` and `_nv₁ ∈ NV`)
+are defined with extra inference rules and expressed explicitly with extra
+premises on the semantic rules.
