@@ -21,7 +21,7 @@ export default class Rule {
     this.conclusion = conclusion;
   }
 
-  static define({ premises, conclusion }) {
+  static define({ premises = [], conclusion }) {
     const parser = new Parser();
     return new Rule(premises.map(parser.parse, parser), parser.parse(conclusion));
   }
