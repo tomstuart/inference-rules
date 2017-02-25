@@ -7,14 +7,14 @@ export default class {
   }
 
   buildKeyword(name) {
-    return new AST.Keyword(name);
+    return new AST.Keyword({ name });
   }
 
   buildSequence(expressions) {
-    return new AST.Sequence(expressions);
+    return new AST.Sequence({ expressions });
   }
 
   buildVariable(name) {
-    return new AST.Variable(name, this.scope);
+    return new AST.Variable({ name, scope: this.scope });
   }
 };

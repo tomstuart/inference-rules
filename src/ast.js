@@ -1,20 +1,9 @@
+import { Record } from 'immutable';
+
+const KEYWORD = {}, SEQUENCE = {}, VARIABLE = {};
+
 export default {
-  Keyword: class {
-    constructor(name) {
-      this.name = name;
-    }
-  },
-
-  Sequence: class {
-    constructor(expressions) {
-      this.expressions = expressions;
-    }
-  },
-
-  Variable: class {
-    constructor(name, scope) {
-      this.name = name;
-      this.scope = scope;
-    }
-  }
+  Keyword: class extends Record({ type: KEYWORD, name: undefined }) {},
+  Sequence: class extends Record({ type: SEQUENCE, expressions: undefined }) {},
+  Variable: class extends Record({ type: VARIABLE, name: undefined, scope: undefined }) {}
 };
