@@ -42,13 +42,13 @@ describe('definition', () => {
         expect(matches.size).toBe(1);
         let match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike('if _t₁′ then false else true');
-        expect(match.premises).toHaveLength(5);
-        const premise = match.premises[0];
+        expect(match.premises.size).toBe(5);
+        const premise = match.premises.first();
         matches = definition.matchRules(premise, match.state);
         expect(matches.size).toBe(2);
         match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike('if true then false else true');
-        expect(match.premises).toHaveLength(2);
+        expect(match.premises.size).toBe(2);
       });
     });
 

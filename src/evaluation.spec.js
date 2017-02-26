@@ -7,22 +7,22 @@ describe('evaluation', () => {
     { conclusion: 'true ∈ T' },
     { conclusion: 'false ∈ T' },
     {
-      premises: ['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'],
+      premises: List.of('_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'),
       conclusion: '(if _t₁ then _t₂ else _t₃) ∈ T'
     }
   ];
 
   const booleanSemantics = [
     {
-      premises: ['_t₂ ∈ T', '_t₃ ∈ T'],
+      premises: List.of('_t₂ ∈ T', '_t₃ ∈ T'),
       conclusion: '(if true then _t₂ else _t₃) → _t₂'
     },
     {
-      premises: ['_t₂ ∈ T', '_t₃ ∈ T'],
+      premises: List.of('_t₂ ∈ T', '_t₃ ∈ T'),
       conclusion: '(if false then _t₂ else _t₃) → _t₃'
     },
     {
-      premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'],
+      premises: List.of('_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'),
       conclusion: '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
     }
   ];
@@ -117,35 +117,35 @@ describe('evaluation', () => {
 
   const arithmeticSyntax = [
     { conclusion: '0 ∈ T' },
-    { premises: ['_t₁ ∈ T'], conclusion: '(succ _t₁) ∈ T' },
-    { premises: ['_t₁ ∈ T'], conclusion: '(pred _t₁) ∈ T' },
-    { premises: ['_t₁ ∈ T'], conclusion: '(iszero _t₁) ∈ T' },
+    { premises: List.of('_t₁ ∈ T'), conclusion: '(succ _t₁) ∈ T' },
+    { premises: List.of('_t₁ ∈ T'), conclusion: '(pred _t₁) ∈ T' },
+    { premises: List.of('_t₁ ∈ T'), conclusion: '(iszero _t₁) ∈ T' },
 
     { conclusion: '0 ∈ NV' },
-    { premises: ['_nv₁ ∈ NV'], conclusion: '(succ _nv₁) ∈ NV' }
+    { premises: List.of('_nv₁ ∈ NV'), conclusion: '(succ _nv₁) ∈ NV' }
   ];
 
   const arithmeticSemantics = [
     {
-      premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+      premises: List.of('_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'),
       conclusion: '(succ _t₁) → (succ _t₁′)'
     },
     { conclusion: '(pred 0) → 0' },
     {
-      premises: ['_nv₁ ∈ NV'],
+      premises: List.of('_nv₁ ∈ NV'),
       conclusion: '(pred (succ _nv₁)) → _nv₁'
     },
     {
-      premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+      premises: List.of('_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'),
       conclusion: '(pred _t₁) → (pred _t₁′)'
     },
     { conclusion: '(iszero 0) → true' },
     {
-      premises: ['_nv₁ ∈ NV'],
+      premises: List.of('_nv₁ ∈ NV'),
       conclusion: '(iszero (succ _nv₁)) → false'
     },
     {
-      premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+      premises: List.of('_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'),
       conclusion: '(iszero _t₁) → (iszero _t₁′)'
     }
   ];
