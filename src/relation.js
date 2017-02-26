@@ -32,15 +32,15 @@ export default class Relation {
     const formula = builder.buildSequence([input, builder.buildKeyword(this.name), output]);
     const states = this.definition.derive(formula);
 
-    if (states.length === 0) {
+    if (states.isEmpty()) {
       throw new NoRuleApplies();
     }
 
-    if (states.length > 1) {
+    if (states.size > 1) {
       throw new Nondeterministic();
     }
 
-    return states[0].valueOf(output);
+    return states.first().valueOf(output);
   }
 
   many(input) {

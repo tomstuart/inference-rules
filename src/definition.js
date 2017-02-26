@@ -1,4 +1,5 @@
 import State from './state';
+import { List } from 'immutable';
 
 export default class {
   constructor(rules) {
@@ -6,15 +7,13 @@ export default class {
   }
 
   matchRules(expression, state = new State()) {
-    return this.rules.map(rule => rule.match(expression, state)).
+    return List(this.rules).map(rule => rule.match(expression, state)).
       filter(match => match !== undefined);
   }
 
   derive(expression, state = new State()) {
-    const states = this.matchRules(expression, state).
-      map(match => match.tryPremises(this.derive.bind(this)));
-
-    return Array.prototype.concat.apply([], states).
+    return this.matchRules(expression, state).
+      flatMap(match => match.tryPremises(this.derive.bind(this))).
       filter(state => state !== undefined);
   }
 };

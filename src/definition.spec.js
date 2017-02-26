@@ -30,22 +30,22 @@ describe('definition', () => {
       test('', () => {
         const formula = parse('(if false then false else true) → _result');
         const matches = definition.matchRules(formula);
-        expect(matches).toHaveLength(2);
-        const match = matches[0];
+        expect(matches.size).toBe(2);
+        const match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike('true');
       });
 
       test('', () => {
         const formula = parse('(if (if true then true else false) then false else true) → _result');
         let matches = definition.matchRules(formula);
-        expect(matches).toHaveLength(1);
-        let match = matches[0];
+        expect(matches.size).toBe(1);
+        let match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike('if _t₁′ then false else true');
         expect(match.premises).toHaveLength(5);
         const premise = match.premises[0];
         matches = definition.matchRules(premise, match.state);
-        expect(matches).toHaveLength(2);
-        match = matches[0];
+        expect(matches.size).toBe(2);
+        match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike('if true then false else true');
         expect(match.premises).toHaveLength(2);
       });
@@ -55,39 +55,39 @@ describe('definition', () => {
       test('', () => {
         const formula = parse('(if false then false else true) → _result');
         const states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        const state = states[0];
+        expect(states.size).toBe(1);
+        const state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('true');
       });
 
       test('', () => {
         let formula = parse('(if (if true then true else false) then false else true) → _result');
         let states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        let state = states[0];
+        expect(states.size).toBe(1);
+        let state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('if true then false else true');
         formula = evaluates(state.valueOf(formula.findVariable('result')), parse('_result'));
         states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        state = states[0];
+        expect(states.size).toBe(1);
+        state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('false');
       });
 
       test('', () => {
         let formula = parse('(if (if (if true then false else true) then true else false) then false else true) → _result');
         let states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        let state = states[0];
+        expect(states.size).toBe(1);
+        let state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('if (if false then true else false) then false else true');
         formula = evaluates(state.valueOf(formula.findVariable('result')), parse('_result'));
         states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        state = states[0];
+        expect(states.size).toBe(1);
+        state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('if false then false else true');
         formula = evaluates(state.valueOf(formula.findVariable('result')), parse('_result'));
         states = definition.derive(formula);
-        expect(states).toHaveLength(1);
-        state = states[0];
+        expect(states.size).toBe(1);
+        state = states.first();
         expect(state.valueOf(formula.findVariable('result'))).toLookLike('true');
       });
     });

@@ -1,5 +1,6 @@
 import Builder from './builder';
 import Parser from './parser';
+import { List } from 'immutable';
 
 class Match {
   constructor(premises, state) {
@@ -8,10 +9,10 @@ class Match {
   }
 
   tryPremises(callback) {
-    return this.premises.reduce((states, premise) => {
-      const nextStates = states.map(state => callback(premise, state));
-      return Array.prototype.concat.apply([], nextStates);
-    }, [this.state]);
+    return this.premises.reduce(
+      (states, premise) => states.flatMap(state => callback(premise, state)),
+      List.of(this.state)
+    );
   }
 }
 
