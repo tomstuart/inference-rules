@@ -1,4 +1,5 @@
 import AST from './ast';
+import { List } from 'immutable';
 import Scope from './scope';
 
 export default class {
@@ -11,7 +12,7 @@ export default class {
   }
 
   buildSequence(expressions) {
-    return new AST.Sequence({ expressions });
+    return new AST.Sequence({ expressions: List(expressions) });
   }
 
   buildVariable(name) {

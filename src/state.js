@@ -1,6 +1,6 @@
 import AST from './ast';
 import Builder from './builder'
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 
 export default class State {
   constructor(values = Map()) {
@@ -31,8 +31,8 @@ export default class State {
     } else if (bv instanceof AST.Variable) {
       return this.assignValues(Map([[bv, av]]));
     } else if (av instanceof AST.Sequence && bv instanceof AST.Sequence) {
-      if (av.expressions.length === bv.expressions.length) {
-        return List(av.expressions).zip(bv.expressions).
+      if (av.expressions.size === bv.expressions.size) {
+        return av.expressions.zip(bv.expressions).
           reduce((state, [a, b]) => state && state.unify(a, b), this);
       }
     }
