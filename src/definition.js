@@ -13,7 +13,6 @@ export default class {
 
   derive(expression, state = new State()) {
     return this.matchRules(expression, state).
-      flatMap(match => match.tryPremises(this.derive.bind(this))).
-      filter(state => state !== undefined);
+      flatMap(match => match.tryPremises(this.derive.bind(this)));
   }
 };
