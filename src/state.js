@@ -7,8 +7,8 @@ export default class State {
     this.values = values;
   }
 
-  assignValues(moreValues) {
-    return new State(this.values.merge(moreValues));
+  assignValue(key, value) {
+    return new State(this.values.set(key, value));
   }
 
   valueOf(key) {
@@ -27,9 +27,9 @@ export default class State {
     if (av.equals(bv)) {
       return this;
     } else if (av instanceof AST.Variable) {
-      return this.assignValues(Map([[av, bv]]));
+      return this.assignValue(av, bv);
     } else if (bv instanceof AST.Variable) {
-      return this.assignValues(Map([[bv, av]]));
+      return this.assignValue(bv, av);
     } else if (av instanceof AST.Sequence && bv instanceof AST.Sequence) {
       if (av.expressions.size === bv.expressions.size) {
         return av.expressions.zip(bv.expressions).
