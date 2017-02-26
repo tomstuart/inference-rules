@@ -3,6 +3,7 @@ import { keyword, sequence } from './builder_helpers';
 import { parse } from './parser_helpers';
 import PrettyPrintingMatchers from './pretty_printing_matchers';
 import { rule } from './rule_helpers';
+import { List } from 'immutable';
 
 describe('definition', () => {
   expect.extend(PrettyPrintingMatchers);
@@ -24,7 +25,7 @@ describe('definition', () => {
   const evaluates = (before, after) => sequence(before, keyword('→'), after);
 
   describe('boolean', () => {
-    const definition = new Definition(syntax.concat(semantics));
+    const definition = new Definition(List.of(...syntax, ...semantics));
 
     describe('matching', () => {
       test('', () => {

@@ -1,5 +1,6 @@
 import Relation from './relation';
 import { parse } from './parser_helpers';
+import { List } from 'immutable';
 
 describe('evaluation', () => {
   const booleanSyntax = [
@@ -30,7 +31,7 @@ describe('evaluation', () => {
     let booleanEvaluation =
       Relation.define({
         name: '→',
-        rules: [].concat(booleanSyntax, booleanSemantics)
+        rules: List.of(...booleanSyntax, ...booleanSemantics)
       });
 
     expect.extend({
@@ -153,7 +154,7 @@ describe('evaluation', () => {
     let arithmeticEvaluation =
       Relation.define({
         name: '→',
-        rules: [].concat(booleanSyntax, booleanSemantics, arithmeticSyntax, arithmeticSemantics)
+        rules: List.of(...booleanSyntax, ...booleanSemantics, ...arithmeticSyntax, ...arithmeticSemantics)
       });
 
     expect.extend({
