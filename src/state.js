@@ -22,7 +22,7 @@ export default class State {
   }
 
   unify(a, b) {
-    const av = this.valueOf(a), bv = this.valueOf(b);
+    const [av, bv] = [a, b].map(this.valueOf, this);
 
     if (av.equals(bv)) {
       return this;
