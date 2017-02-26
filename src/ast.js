@@ -25,8 +25,7 @@ export default {
     }
 
     findVariable(name) {
-      for (let i = 0; i < this.expressions.length; ++i) {
-        const expression = this.expressions[i];
+      for (const expression of this.expressions) {
         const result = expression.findVariable(name);
 
         if (result !== undefined) {
