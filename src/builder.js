@@ -18,4 +18,4 @@ export default class {
   buildVariable(name) {
     return new AST.Variable({ name, scope: this.scope });
   }
-};
+}

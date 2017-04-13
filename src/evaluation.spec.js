@@ -22,17 +22,22 @@ describe('evaluation', () => {
       conclusion: '(if false then _t₂ else _t₃) → _t₃'
     },
     {
-      premises: List.of('_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'),
+      premises: List.of(
+        '_t₁ → _t₁′',
+        '_t₁ ∈ T',
+        '_t₂ ∈ T',
+        '_t₃ ∈ T',
+        '_t₁′ ∈ T'
+      ),
       conclusion: '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
     }
   ];
 
   describe('boolean expressions', () => {
-    let booleanEvaluation =
-      Relation.define({
-        name: '→',
-        rules: List.of(...booleanSyntax, ...booleanSemantics)
-      });
+    let booleanEvaluation = Relation.define({
+      name: '→',
+      rules: List.of(...booleanSyntax, ...booleanSemantics)
+    });
 
     expect.extend({
       toEvaluateTo(before, after) {
@@ -48,7 +53,7 @@ describe('evaluation', () => {
           return {
             pass: false,
             message: `expected ${before} to evaluate to “${after}”, but got “${actual}”`
-          }
+          };
         }
       }
     });
@@ -61,7 +66,9 @@ describe('evaluation', () => {
 
     describe('', () => {
       test('', () => {
-        expect('if (if true then true else false) then false else true').toEvaluateTo('if true then false else true');
+        expect(
+          'if (if true then true else false) then false else true'
+        ).toEvaluateTo('if true then false else true');
       });
 
       test('', () => {
@@ -71,11 +78,17 @@ describe('evaluation', () => {
 
     describe('', () => {
       test('', () => {
-        expect('if (if (if true then false else true) then true else false) then false else true').toEvaluateTo('if (if false then true else false) then false else true');
+        expect(
+          'if (if (if true then false else true) then true else false) then false else true'
+        ).toEvaluateTo(
+          'if (if false then true else false) then false else true'
+        );
       });
 
       test('', () => {
-        expect('if (if false then true else false) then false else true').toEvaluateTo('if false then false else true');
+        expect(
+          'if (if false then true else false) then false else true'
+        ).toEvaluateTo('if false then false else true');
       });
 
       test('', () => {
@@ -97,7 +110,7 @@ describe('evaluation', () => {
           return {
             pass: false,
             message: `expected ${before} to finally evaluate to “${after}”, but got “${actual}”`
-          }
+          };
         }
       }
     });
@@ -107,11 +120,15 @@ describe('evaluation', () => {
     });
 
     test('', () => {
-      expect('if (if true then true else false) then false else true').toFinallyEvaluateTo('false');
+      expect(
+        'if (if true then true else false) then false else true'
+      ).toFinallyEvaluateTo('false');
     });
 
     test('', () => {
-      expect('if (if (if true then false else true) then true else false) then false else true').toFinallyEvaluateTo('true');
+      expect(
+        'if (if (if true then false else true) then true else false) then false else true'
+      ).toFinallyEvaluateTo('true');
     });
   });
 
@@ -151,11 +168,15 @@ describe('evaluation', () => {
   ];
 
   describe('arithmetic expressions', () => {
-    let arithmeticEvaluation =
-      Relation.define({
-        name: '→',
-        rules: List.of(...booleanSyntax, ...booleanSemantics, ...arithmeticSyntax, ...arithmeticSemantics)
-      });
+    let arithmeticEvaluation = Relation.define({
+      name: '→',
+      rules: List.of(
+        ...booleanSyntax,
+        ...booleanSemantics,
+        ...arithmeticSyntax,
+        ...arithmeticSemantics
+      )
+    });
 
     expect.extend({
       toFinallyEvaluateTo(before, after) {
@@ -171,7 +192,7 @@ describe('evaluation', () => {
           return {
             pass: false,
             message: `expected ${before} to finally evaluate to “${after}”, but got “${actual}”`
-          }
+          };
         }
       }
     });
@@ -181,7 +202,9 @@ describe('evaluation', () => {
     });
 
     test('', () => {
-      expect('if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))').toFinallyEvaluateTo('0');
+      expect(
+        'if (iszero (succ 0)) then (succ (pred 0)) else (pred (succ 0))'
+      ).toFinallyEvaluateTo('0');
     });
 
     test('', () => {
@@ -189,7 +212,9 @@ describe('evaluation', () => {
     });
 
     test('', () => {
-      expect('pred (succ (succ true))').toFinallyEvaluateTo('pred (succ (succ true))');
+      expect('pred (succ (succ true))').toFinallyEvaluateTo(
+        'pred (succ (succ true))'
+      );
     });
 
     test('', () => {
@@ -201,7 +226,9 @@ describe('evaluation', () => {
     });
 
     test('', () => {
-      expect('iszero (succ (succ (succ (succ 0))))').toFinallyEvaluateTo('false');
+      expect('iszero (succ (succ (succ (succ 0))))').toFinallyEvaluateTo(
+        'false'
+      );
     });
 
     test('', () => {

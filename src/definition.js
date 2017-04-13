@@ -6,12 +6,14 @@ export default class {
   }
 
   matchRules(expression, state = new State()) {
-    return this.rules.map(rule => rule.match(expression, state)).
-      filter(match => match !== undefined);
+    return this.rules
+      .map(rule => rule.match(expression, state))
+      .filter(match => match !== undefined);
   }
 
   derive(expression, state = new State()) {
-    return this.matchRules(expression, state).
-      flatMap(match => match.tryPremises(this.derive.bind(this)));
+    return this.matchRules(expression, state).flatMap(match =>
+      match.tryPremises(this.derive.bind(this))
+    );
   }
-};
+}

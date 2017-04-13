@@ -15,7 +15,7 @@ export default class {
   }
 
   parseEverything() {
-    const expression = this.parseSequence()
+    const expression = this.parseSequence();
     this.read(/$/);
 
     return expression;
@@ -106,4 +106,4 @@ export default class {
 
     throw new Error(complaint);
   }
-};
+}

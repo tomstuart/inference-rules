@@ -9,7 +9,7 @@ export default {
       return {
         pass: false,
         message: `expected ${object} to look like “${string}”`
-      }
+      };
     }
   }
 };

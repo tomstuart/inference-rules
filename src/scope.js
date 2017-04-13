@@ -4,4 +4,4 @@ export default class {
   constructor() {
     this.id = id++;
   }
-};
+}

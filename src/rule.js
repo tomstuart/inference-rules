@@ -24,7 +24,10 @@ export default class Rule {
 
   static define({ premises = List(), conclusion }) {
     const parser = new Parser();
-    return new Rule(premises.map(parser.parse, parser), parser.parse(conclusion));
+    return new Rule(
+      premises.map(parser.parse, parser),
+      parser.parse(conclusion)
+    );
   }
 
   match(expression, state) {
@@ -35,4 +38,4 @@ export default class Rule {
       return new Match(this.premises.map(p => p(builder)), nextState);
     }
   }
-};
+}

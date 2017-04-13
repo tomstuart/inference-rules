@@ -57,7 +57,9 @@ describe('state', () => {
       });
 
       test('', () => {
-        expect(state.valueOf(formula.findVariable('result'))).toLookLike('false');
+        expect(state.valueOf(formula.findVariable('result'))).toLookLike(
+          'false'
+        );
       });
     });
 
@@ -105,7 +107,9 @@ describe('state', () => {
       });
 
       test('', () => {
-        expect(state.valueOf(formula.findVariable('result'))).toLookLike('true');
+        expect(state.valueOf(formula.findVariable('result'))).toLookLike(
+          'true'
+        );
       });
     });
   });

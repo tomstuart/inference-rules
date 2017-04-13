@@ -29,7 +29,11 @@ export default class Relation {
   once(input) {
     const builder = new Builder();
     const output = builder.buildVariable('output');
-    const formula = builder.buildSequence([input, builder.buildKeyword(this.name), output]);
+    const formula = builder.buildSequence([
+      input,
+      builder.buildKeyword(this.name),
+      output
+    ]);
     const states = this.definition.derive(formula);
 
     if (states.isEmpty()) {
@@ -54,4 +58,4 @@ export default class Relation {
       }
     }
   }
-};
+}

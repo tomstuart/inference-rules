@@ -21,7 +21,7 @@ export default {
     }
 
     bracketed() {
-      return `(${this})`
+      return `(${this})`;
     }
 
     findVariable(name) {
@@ -35,7 +35,8 @@ export default {
     }
   },
 
-  Variable: class extends Record({ type: VARIABLE, name: undefined, scope: undefined }) {
+  Variable: class
+    extends Record({ type: VARIABLE, name: undefined, scope: undefined }) {
     toString() {
       return `_${this.name}`;
     }

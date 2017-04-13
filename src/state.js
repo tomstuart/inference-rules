@@ -1,5 +1,5 @@
 import AST from './ast';
-import Builder from './builder'
+import Builder from './builder';
 import { Map } from 'immutable';
 
 export default class State {
@@ -15,7 +15,9 @@ export default class State {
     if (this.values.has(key)) {
       return this.valueOf(this.values.get(key));
     } else if (key instanceof AST.Sequence) {
-      return new Builder().buildSequence(key.expressions.map(this.valueOf, this));
+      return new Builder().buildSequence(
+        key.expressions.map(this.valueOf, this)
+      );
     } else {
       return key;
     }
@@ -32,9 +34,10 @@ export default class State {
       return this.assignValue(bv, av);
     } else if (av instanceof AST.Sequence && bv instanceof AST.Sequence) {
       if (av.expressions.size === bv.expressions.size) {
-        return av.expressions.zip(bv.expressions).
-          reduce((state, [a, b]) => state && state.unify(a, b), this);
+        return av.expressions
+          .zip(bv.expressions)
+          .reduce((state, [a, b]) => state && state.unify(a, b), this);
       }
     }
   }
-};
+}
