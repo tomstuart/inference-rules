@@ -11,7 +11,7 @@ RSpec.describe do
   include PrettyPrintingMatchers
   include RuleHelpers
 
-  let(:boolean_syntax) {
+  let(:boolean_term_syntax) {
     [
       rule([], 'true ∈ t'),
       rule([], 'false ∈ t'),
@@ -27,7 +27,7 @@ RSpec.describe do
     ]
   }
 
-  let(:arithmetic_syntax) {
+  let(:arithmetic_term_syntax) {
     [
       rule([], '0 ∈ t'),
       rule(['_t₁ ∈ t'], '(succ _t₁) ∈ t'),
@@ -56,7 +56,7 @@ RSpec.describe do
   end
 
   describe 'boolean' do
-    let(:definition) { Definition.new(boolean_syntax + boolean_semantics) }
+    let(:definition) { Definition.new(boolean_term_syntax + boolean_semantics) }
 
     describe 'matching' do
       specify do

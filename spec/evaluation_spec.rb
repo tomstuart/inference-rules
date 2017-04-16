@@ -4,7 +4,7 @@ require 'support/parser_helpers'
 RSpec.describe 'evaluation' do
   include ParserHelpers
 
-  let(:boolean_syntax) {[
+  let(:boolean_term_syntax) {[
     { conclusion: 'true ∈ t' },
     { conclusion: 'false ∈ t' },
     {
@@ -30,7 +30,7 @@ RSpec.describe 'evaluation' do
 
   describe 'boolean expressions' do
     let(:boolean_evaluation) {
-      Relation.define name: '→', rules: boolean_syntax + boolean_semantics
+      Relation.define name: '→', rules: boolean_term_syntax + boolean_semantics
     }
 
     matcher :evaluate_to do |expected|
@@ -65,7 +65,7 @@ RSpec.describe 'evaluation' do
     specify { expect('if (if (if true then false else true) then true else false) then false else true').to finally_evaluate_to 'true' }
   end
 
-  let(:arithmetic_syntax) {[
+  let(:arithmetic_term_syntax) {[
     { conclusion: '0 ∈ t' },
     { premises: ['_t₁ ∈ t'], conclusion: '(succ _t₁) ∈ t' },
     { premises: ['_t₁ ∈ t'], conclusion: '(pred _t₁) ∈ t' },
@@ -102,7 +102,7 @@ RSpec.describe 'evaluation' do
 
   describe 'arithmetic expressions' do
     let(:arithmetic_evaluation) {
-      Relation.define name: '→', rules: boolean_syntax + boolean_semantics + arithmetic_syntax + arithmetic_semantics
+      Relation.define name: '→', rules: boolean_term_syntax + boolean_semantics + arithmetic_term_syntax + arithmetic_semantics
     }
 
     matcher :finally_evaluate_to do |expected|

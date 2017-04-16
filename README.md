@@ -50,7 +50,7 @@ Here’s what it looks like in practice:
 
 ```irb
 $ irb -Ilib -rparser -rrelation
->> BOOLEAN_SYNTAX =
+>> BOOLEAN_TERM_SYNTAX =
      { conclusion: 'true ∈ t' },
      { conclusion: 'false ∈ t' },
      {
@@ -77,7 +77,7 @@ $ irb -Ilib -rparser -rrelation
 >> BOOLEAN_EVALUATION =
      Relation.define \
        name: '→',
-       rules: BOOLEAN_SYNTAX + BOOLEAN_SEMANTICS
+       rules: BOOLEAN_TERM_SYNTAX + BOOLEAN_SEMANTICS
 => #<Relation @name="→", @definition=#<Definition @rules=[…]>>
 
 >> def eval1(term)
@@ -103,7 +103,7 @@ $ irb -Ilib -rparser -rrelation
 >> evaluate(term)
 => «false»
 
->> ARITHMETIC_SYNTAX =
+>> ARITHMETIC_TERM_SYNTAX =
      { conclusion: '0 ∈ t' },
      { premises: ['_t₁ ∈ t'], conclusion: '(succ _t₁) ∈ t' },
      { premises: ['_t₁ ∈ t'], conclusion: '(pred _t₁) ∈ t' },
@@ -141,7 +141,7 @@ $ irb -Ilib -rparser -rrelation
 >> ARITHMETIC_EVALUATION =
      Relation.define \
        name: '→',
-       rules: BOOLEAN_SYNTAX + BOOLEAN_SEMANTICS + ARITHMETIC_SYNTAX + ARITHMETIC_SEMANTICS
+       rules: BOOLEAN_TERM_SYNTAX + BOOLEAN_SEMANTICS + ARITHMETIC_TERM_SYNTAX + ARITHMETIC_SEMANTICS
 => #<Relation @name="→", @definition=#<Definition @rules=[…]>>
 
 >> def eval1(term)
