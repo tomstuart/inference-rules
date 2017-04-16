@@ -13,41 +13,41 @@ RSpec.describe do
 
   let(:boolean_syntax) {
     [
-      rule([], 'true ∈ T'),
-      rule([], 'false ∈ T'),
-      rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T')
+      rule([], 'true ∈ t'),
+      rule([], 'false ∈ t'),
+      rule(['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'], '(if _t₁ then _t₂ else _t₃) ∈ t')
     ]
   }
 
   let(:boolean_semantics) {
     [
-      rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if true then _t₂ else _t₃) → _t₂'),
-      rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if false then _t₂ else _t₃) → _t₃'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')
+      rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if true then _t₂ else _t₃) → _t₂'),
+      rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if false then _t₂ else _t₃) → _t₃'),
+      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')
     ]
   }
 
   let(:arithmetic_syntax) {
     [
-      rule([], '0 ∈ T'),
-      rule(['_t₁ ∈ T'], '(succ _t₁) ∈ T'),
-      rule(['_t₁ ∈ T'], '(pred _t₁) ∈ T'),
-      rule(['_t₁ ∈ T'], '(iszero _t₁) ∈ T'),
+      rule([], '0 ∈ t'),
+      rule(['_t₁ ∈ t'], '(succ _t₁) ∈ t'),
+      rule(['_t₁ ∈ t'], '(pred _t₁) ∈ t'),
+      rule(['_t₁ ∈ t'], '(iszero _t₁) ∈ t'),
 
-      rule([], '0 ∈ NV'),
-      rule(['_nv₁ ∈ NV'], '(succ _nv₁) ∈ NV')
+      rule([], '0 ∈ nv'),
+      rule(['_nv₁ ∈ nv'], '(succ _nv₁) ∈ nv')
     ]
   }
 
   let(:arithmetic_semantics) {
     [
-      rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(succ _t₁) → (succ _t₁′)'),
+      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(succ _t₁) → (succ _t₁′)'),
       rule([], '(pred 0) → 0'),
-      rule(['_nv₁ ∈ NV'], '(pred (succ _nv₁)) → _nv₁'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(pred _t₁) → (pred _t₁′)'),
+      rule(['_nv₁ ∈ nv'], '(pred (succ _nv₁)) → _nv₁'),
+      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(pred _t₁) → (pred _t₁′)'),
       rule([], '(iszero 0) → true'),
-      rule(['_nv₁ ∈ NV'], '(iszero (succ _nv₁)) → false'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'], '(iszero _t₁) → (iszero _t₁′)')
+      rule(['_nv₁ ∈ nv'], '(iszero (succ _nv₁)) → false'),
+      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(iszero _t₁) → (iszero _t₁′)')
     ]
   }
 

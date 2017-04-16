@@ -51,25 +51,25 @@ Here’s what it looks like in practice:
 ```irb
 $ irb -Ilib -rparser -rrelation
 >> BOOLEAN_SYNTAX =
-     { conclusion: 'true ∈ T' },
-     { conclusion: 'false ∈ T' },
+     { conclusion: 'true ∈ t' },
+     { conclusion: 'false ∈ t' },
      {
-       premises: ['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'],
-       conclusion: '(if _t₁ then _t₂ else _t₃) ∈ T'
+       premises: ['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'],
+       conclusion: '(if _t₁ then _t₂ else _t₃) ∈ t'
      }
 => […]
 
 >> BOOLEAN_SEMANTICS =
      {
-       premises: ['_t₂ ∈ T', '_t₃ ∈ T'],
+       premises: ['_t₂ ∈ t', '_t₃ ∈ t'],
        conclusion: '(if true then _t₂ else _t₃) → _t₂'
      },
      {
-       premises: ['_t₂ ∈ T', '_t₃ ∈ T'],
+       premises: ['_t₂ ∈ t', '_t₃ ∈ t'],
        conclusion: '(if false then _t₂ else _t₃) → _t₃'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'],
+       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'],
        conclusion: '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
      }
 => […]
@@ -104,36 +104,36 @@ $ irb -Ilib -rparser -rrelation
 => «false»
 
 >> ARITHMETIC_SYNTAX =
-     { conclusion: '0 ∈ T' },
-     { premises: ['_t₁ ∈ T'], conclusion: '(succ _t₁) ∈ T' },
-     { premises: ['_t₁ ∈ T'], conclusion: '(pred _t₁) ∈ T' },
-     { premises: ['_t₁ ∈ T'], conclusion: '(iszero _t₁) ∈ T' },
+     { conclusion: '0 ∈ t' },
+     { premises: ['_t₁ ∈ t'], conclusion: '(succ _t₁) ∈ t' },
+     { premises: ['_t₁ ∈ t'], conclusion: '(pred _t₁) ∈ t' },
+     { premises: ['_t₁ ∈ t'], conclusion: '(iszero _t₁) ∈ t' },
 
-     { conclusion: '0 ∈ NV' },
-     { premises: ['_nv₁ ∈ NV'], conclusion: '(succ _nv₁) ∈ NV' }
+     { conclusion: '0 ∈ nv' },
+     { premises: ['_nv₁ ∈ nv'], conclusion: '(succ _nv₁) ∈ nv' }
 => […]
 
 >> ARITHMETIC_SEMANTICS =
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
        conclusion: '(succ _t₁) → (succ _t₁′)'
      },
      { conclusion: '(pred 0) → 0' },
      {
-       premises: ['_nv₁ ∈ NV'],
+       premises: ['_nv₁ ∈ nv'],
        conclusion: '(pred (succ _nv₁)) → _nv₁'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
        conclusion: '(pred _t₁) → (pred _t₁′)'
      },
      { conclusion: '(iszero 0) → true' },
      {
-       premises: ['_nv₁ ∈ NV'],
+       premises: ['_nv₁ ∈ nv'],
        conclusion: '(iszero (succ _nv₁)) → false'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₁′ ∈ T'],
+       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
        conclusion: '(iszero _t₁) → (iszero _t₁′)'
      }
 => […]
@@ -171,6 +171,6 @@ $ irb -Ilib -rparser -rrelation
 Note that the metalanguage places no implicit syntactic constraints on
 metavariables — as far as the system is concerned, a metavariable called `_nv₁`
 can have any value whatsoever as long as all premises are satisfied. In the
-above semantics, important syntactic constraints (`_t₁ ∈ T` and `_nv₁ ∈ NV`)
+above semantics, important syntactic constraints (`_t₁ ∈ t` and `_nv₁ ∈ nv`)
 are defined with extra inference rules and expressed explicitly with extra
 premises on the semantic rules.
