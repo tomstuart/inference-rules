@@ -46,6 +46,8 @@ to the input `iszero (succ 0)`, it will build the expression `(iszero (succ 0))
 rules you provided, and then return the value that the derivation assigned to
 the `_output` metavariable.
 
+## Example: small-step evaluation
+
 Here’s what it looks like in practice:
 
 ```irb
@@ -174,3 +176,93 @@ can have any value whatsoever as long as all premises are satisfied. In the
 above semantics, important syntactic constraints (`_t₁ ∈ t` and `_nv₁ ∈ nv`)
 are defined with extra inference rules and expressed explicitly with extra
 premises on the semantic rules.
+
+## Example: typechecking
+
+Because the metalanguage is agnostic about the meaning of relations, we can
+define a typechecker instead of an evaluator just by writing different rules:
+
+```irb
+>> BOOLEAN_TYPE_SYNTAX = [
+     { conclusion: 'Bool ∈ T' }
+   ]
+=> […]
+
+>> BOOLEAN_TYPE_RULES =
+     { conclusion: 'true : Bool' },
+     { conclusion: 'false : Bool' },
+     {
+       premises: ['_t₁ : Bool', '_t₂ : _T', '_t₃ : _T', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_T ∈ T'],
+       conclusion: '(if _t₁ then _t₂ else _t₃) : _T'
+     }
+=> […]
+
+>> BOOLEAN_TYPECHECKING =
+     Relation.define \
+       name: ':',
+       rules: BOOLEAN_TERM_SYNTAX + BOOLEAN_TYPE_SYNTAX + BOOLEAN_TYPE_RULES
+=> #<Relation @name=":", @definition=#<Definition @rules=[…]>>
+
+>> def type_of(term)
+     begin
+       BOOLEAN_TYPECHECKING.once(term)
+     rescue Relation::NoRuleApplies
+       nil
+     end
+   end
+=> :type_of
+
+>> type_of(Parser.parse('if (if false then true else (if true then true else false)) then false else true'))
+=> «Bool»
+
+> type_of(Parser.parse('hello world'))
+=> nil
+
+>> ARITHMETIC_TYPE_SYNTAX = [
+     { conclusion: 'Nat ∈ T' }
+   ]
+=> […]
+
+>> ARITHMETIC_TYPE_RULES =
+     { conclusion: '0 : Nat' },
+     {
+       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
+       conclusion: '(succ _t₁) : Nat'
+     },
+     {
+       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
+       conclusion: '(pred _t₁) : Nat'
+     },
+     {
+       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
+       conclusion: '(iszero _t₁) : Bool'
+     }
+
+>> ARITHMETIC_TYPECHECKING =
+     Relation.define \
+       name: ':',
+       rules: BOOLEAN_TERM_SYNTAX + BOOLEAN_TYPE_SYNTAX + BOOLEAN_TYPE_RULES +
+              ARITHMETIC_TERM_SYNTAX + ARITHMETIC_TYPE_SYNTAX + ARITHMETIC_TYPE_RULES
+=> #<Relation @name=":", @definition=#<Definition @rules=[…]>>
+
+>> def type_of(term)
+     begin
+       ARITHMETIC_TYPECHECKING.once(term)
+     rescue Relation::NoRuleApplies
+       nil
+     end
+   end
+=> :type_of
+
+>> type_of(Parser.parse('if (iszero 0) then (succ 0) else 0'))
+=> «Nat»
+
+>> type_of(Parser.parse('if (iszero (succ 0)) then (iszero 0) else (iszero (pred 0))'))
+=> «Bool»
+
+>> type_of(Parser.parse('if (succ 0) then true else false'))
+=> nil
+
+>> type_of(Parser.parse('if true then (succ 0) else (iszero 0)'))
+=> nil
+```
