@@ -1,6 +1,11 @@
 require 'ast/builder'
+require 'ast/lazy_builder'
 
 class Parser
+  def initialize(builder = AST::LazyBuilder.new)
+    self.builder = builder
+  end
+
   def parse(string)
     self.string = string
     parse_everything
@@ -12,6 +17,7 @@ class Parser
 
   private
 
+  attr_accessor :builder
   attr_reader :string
 
   def string=(string)
@@ -32,7 +38,7 @@ class Parser
     if expressions.length == 1
       expressions.first
     else
-      -> builder { builder.build_sequence(expressions.map { |e| e.call(builder) }) }
+      builder.build_sequence(expressions)
     end
   end
 
@@ -58,13 +64,11 @@ class Parser
 
   def parse_variable
     read %r{_}
-    name = read_name
-    -> builder { builder.build_variable(name) }
+    builder.build_variable(read_name)
   end
 
   def parse_keyword
-    name = read_name
-    -> builder { builder.build_keyword(name) }
+    builder.build_keyword(read_name)
   end
 
   def read_name
