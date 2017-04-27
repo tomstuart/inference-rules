@@ -1,8 +1,7 @@
 require 'ast/builder'
-require 'ast/lazy_builder'
 
 class Parser
-  def initialize(builder = AST::LazyBuilder.new)
+  def initialize(builder)
     self.builder = builder
   end
 
@@ -12,7 +11,7 @@ class Parser
   end
 
   def self.parse(string)
-    self.new.parse(string).call(AST::Builder.new)
+    self.new(AST::Builder.new).parse(string)
   end
 
   private

@@ -1,5 +1,6 @@
 require 'parser'
 require 'ast/builder'
+require 'ast/lazy_builder'
 
 class Rule
   def initialize(premises, conclusion)
@@ -7,7 +8,7 @@ class Rule
   end
 
   def self.define(premises: [], conclusion:)
-    parser = Parser.new
+    parser = Parser.new(AST::LazyBuilder.new)
     new(premises.map(&parser.method(:parse)), parser.parse(conclusion))
   end
 
