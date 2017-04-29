@@ -14,10 +14,11 @@ class Relation
   NoRuleApplies = Class.new(StandardError)
   Nondeterministic = Class.new(StandardError)
 
-  def once(input)
+  def once(*inputs)
     builder = AST::Builder.new
     output = builder.build_variable('output')
-    formula = builder.build_sequence([input, builder.build_keyword(name), output])
+    keywords = Array(name).map(&builder.method(:build_keyword))
+    formula = builder.build_sequence(inputs.zip(keywords).flatten(1) + [output])
     states = definition.derive(formula)
 
     raise NoRuleApplies if states.empty?
