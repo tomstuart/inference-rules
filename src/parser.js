@@ -1,7 +1,5 @@
-import LazyBuilder from './lazy_builder';
-
 export default class {
-  constructor(builder = new LazyBuilder()) {
+  constructor(builder) {
     this.builder = builder;
   }
 

@@ -1,4 +1,5 @@
 import Builder from './builder';
+import LazyBuilder from './lazy_builder';
 import Parser from './parser';
 import { List } from 'immutable';
 
@@ -23,7 +24,7 @@ export default class Rule {
   }
 
   static define({ premises = List(), conclusion }) {
-    const parser = new Parser();
+    const parser = new Parser(new LazyBuilder());
     return new Rule(
       premises.map(parser.parse, parser),
       parser.parse(conclusion)

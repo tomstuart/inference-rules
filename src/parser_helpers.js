@@ -3,6 +3,6 @@ import Parser from './parser';
 import Scope from './scope';
 
 const parse = (string, scope = new Scope()) =>
-  new Parser().parse(string)(new Builder(scope));
+  new Parser(new Builder(scope)).parse(string);
 
 export { parse };
