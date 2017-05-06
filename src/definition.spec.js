@@ -9,16 +9,16 @@ describe('definition', () => {
   expect.extend(PrettyPrintingMatchers);
 
   const syntax = [
-    rule([], 'true ∈ T'),
-    rule([], 'false ∈ T'),
-    rule(['_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T'], '(if _t₁ then _t₂ else _t₃) ∈ T')
+    rule([], 'true ∈ t'),
+    rule([], 'false ∈ t'),
+    rule(['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'], '(if _t₁ then _t₂ else _t₃) ∈ t')
   ];
 
   const semantics = [
-    rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if true then _t₂ else _t₃) → _t₂'),
-    rule(['_t₂ ∈ T', '_t₃ ∈ T'], '(if false then _t₂ else _t₃) → _t₃'),
+    rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if true then _t₂ else _t₃) → _t₂'),
+    rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if false then _t₂ else _t₃) → _t₃'),
     rule(
-      ['_t₁ → _t₁′', '_t₁ ∈ T', '_t₂ ∈ T', '_t₃ ∈ T', '_t₁′ ∈ T'],
+      ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'],
       '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
     )
   ];
