@@ -3,7 +3,7 @@ import { parse } from './parser_helpers';
 import { List } from 'immutable';
 
 describe('evaluation', () => {
-  const booleanSyntax = [
+  const booleanTermSyntax = [
     { conclusion: 'true ∈ t' },
     { conclusion: 'false ∈ t' },
     {
@@ -36,7 +36,7 @@ describe('evaluation', () => {
   describe('boolean expressions', () => {
     let booleanEvaluation = Relation.define({
       name: '→',
-      rules: List.of(...booleanSyntax, ...booleanSemantics)
+      rules: List.of(...booleanTermSyntax, ...booleanSemantics)
     });
 
     expect.extend({
@@ -132,7 +132,7 @@ describe('evaluation', () => {
     });
   });
 
-  const arithmeticSyntax = [
+  const arithmeticTermSyntax = [
     { conclusion: '0 ∈ t' },
     { premises: List.of('_t₁ ∈ t'), conclusion: '(succ _t₁) ∈ t' },
     { premises: List.of('_t₁ ∈ t'), conclusion: '(pred _t₁) ∈ t' },
@@ -171,9 +171,9 @@ describe('evaluation', () => {
     let arithmeticEvaluation = Relation.define({
       name: '→',
       rules: List.of(
-        ...booleanSyntax,
+        ...booleanTermSyntax,
         ...booleanSemantics,
-        ...arithmeticSyntax,
+        ...arithmeticTermSyntax,
         ...arithmeticSemantics
       )
     });

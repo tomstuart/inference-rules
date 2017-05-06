@@ -8,7 +8,7 @@ import { List } from 'immutable';
 describe('definition', () => {
   expect.extend(PrettyPrintingMatchers);
 
-  const syntax = [
+  const termSyntax = [
     rule([], 'true ∈ t'),
     rule([], 'false ∈ t'),
     rule(['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'], '(if _t₁ then _t₂ else _t₃) ∈ t')
@@ -26,7 +26,7 @@ describe('definition', () => {
   const evaluates = (before, after) => sequence(before, keyword('→'), after);
 
   describe('boolean', () => {
-    const definition = new Definition(List.of(...syntax, ...semantics));
+    const definition = new Definition(List.of(...termSyntax, ...semantics));
 
     describe('matching', () => {
       test('', () => {
