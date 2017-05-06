@@ -59,3 +59,5 @@ export default class Relation {
     }
   }
 }
+
+export { NoRuleApplies, Nondeterministic, Relation };
