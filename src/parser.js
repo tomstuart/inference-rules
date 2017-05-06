@@ -1,6 +1,10 @@
-import Builder from './builder';
+import LazyBuilder from './lazy_builder';
 
 export default class {
+  constructor(builder = new LazyBuilder()) {
+    this.builder = builder;
+  }
+
   parse(string) {
     this.string = string;
     return this.parseEverything();
@@ -31,7 +35,7 @@ export default class {
     if (expressions.length === 1) {
       return expressions[0];
     } else {
-      return builder => builder.buildSequence(expressions.map(e => e(builder)));
+      return this.builder.buildSequence(expressions);
     }
   }
 
@@ -57,15 +61,11 @@ export default class {
 
   parseVariable() {
     this.read(/_/);
-    const name = this.readName();
-
-    return builder => builder.buildVariable(name);
+    return this.builder.buildVariable(this.readName());
   }
 
   parseKeyword() {
-    const name = this.readName();
-
-    return builder => builder.buildKeyword(name);
+    return this.builder.buildKeyword(this.readName());
   }
 
   readName() {
