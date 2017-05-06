@@ -26,14 +26,15 @@ export default class Relation {
     return new Relation(name, new Definition(rules.map(Rule.define)));
   }
 
-  once(input) {
+  once(...inputs) {
     const builder = new Builder();
     const output = builder.buildVariable('output');
-    const formula = builder.buildSequence([
-      input,
-      builder.buildKeyword(this.name),
-      output
-    ]);
+    const keywords = [].concat(this.name).map(builder.buildKeyword);
+    const formula = builder.buildSequence(
+      Array.prototype.concat
+        .apply([], inputs.map((i, n) => [i, keywords[n]]))
+        .concat(output)
+    );
     const states = this.definition.derive(formula);
 
     if (states.isEmpty()) {
