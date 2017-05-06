@@ -34,7 +34,7 @@ describe('evaluation', () => {
   ];
 
   describe('boolean expressions', () => {
-    let booleanEvaluation = Relation.define({
+    const booleanEvaluation = Relation.define({
       name: '→',
       rules: List.of(...booleanTermSyntax, ...booleanSemantics)
     });
@@ -168,7 +168,7 @@ describe('evaluation', () => {
   ];
 
   describe('arithmetic expressions', () => {
-    let arithmeticEvaluation = Relation.define({
+    const arithmeticEvaluation = Relation.define({
       name: '→',
       rules: List.of(
         ...booleanTermSyntax,
