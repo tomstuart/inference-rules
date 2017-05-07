@@ -40,7 +40,7 @@ export default class {
   parseExpression() {
     if (this.canRead(/\(/)) {
       return this.parseBrackets();
-    } else if (this.canRead(/_/)) {
+    } else if (this.canRead(/\$/)) {
       return this.parseVariable();
     } else if (this.canRead(/[^\s()]+/)) {
       return this.parseKeyword();
@@ -58,7 +58,7 @@ export default class {
   }
 
   parseVariable() {
-    this.read(/_/);
+    this.read(/\$/);
     return this.builder.buildVariable(this.readName());
   }
 

@@ -11,15 +11,15 @@ describe('definition', () => {
   const termSyntax = [
     rule([], 'true ∈ t'),
     rule([], 'false ∈ t'),
-    rule(['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'], '(if _t₁ then _t₂ else _t₃) ∈ t')
+    rule(['$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t'], '(if $t₁ then $t₂ else $t₃) ∈ t')
   ];
 
   const semantics = [
-    rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if true then _t₂ else _t₃) → _t₂'),
-    rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if false then _t₂ else _t₃) → _t₃'),
+    rule(['$t₂ ∈ t', '$t₃ ∈ t'], '(if true then $t₂ else $t₃) → $t₂'),
+    rule(['$t₂ ∈ t', '$t₃ ∈ t'], '(if false then $t₂ else $t₃) → $t₃'),
     rule(
-      ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'],
-      '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
+      ['$t₁ → $t₁′', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$t₁′ ∈ t'],
+      '(if $t₁ then $t₂ else $t₃) → (if $t₁′ then $t₂ else $t₃)'
     )
   ];
 
@@ -30,7 +30,7 @@ describe('definition', () => {
 
     describe('matching', () => {
       test('', () => {
-        const formula = parse('(if false then false else true) → _result');
+        const formula = parse('(if false then false else true) → $result');
         const matches = definition.matchRules(formula);
         expect(matches.size).toBe(2);
         const match = matches.first();
@@ -41,13 +41,13 @@ describe('definition', () => {
 
       test('', () => {
         const formula = parse(
-          '(if (if true then true else false) then false else true) → _result'
+          '(if (if true then true else false) then false else true) → $result'
         );
         let matches = definition.matchRules(formula);
         expect(matches.size).toBe(1);
         let match = matches.first();
         expect(match.state.valueOf(formula.findVariable('result'))).toLookLike(
-          'if _t₁′ then false else true'
+          'if $t₁′ then false else true'
         );
         expect(match.premises.size).toBe(5);
         const premise = match.premises.first();
@@ -63,7 +63,7 @@ describe('definition', () => {
 
     describe('deriving', () => {
       test('', () => {
-        const formula = parse('(if false then false else true) → _result');
+        const formula = parse('(if false then false else true) → $result');
         const states = definition.derive(formula);
         expect(states.size).toBe(1);
         const state = states.first();
@@ -74,7 +74,7 @@ describe('definition', () => {
 
       test('', () => {
         let formula = parse(
-          '(if (if true then true else false) then false else true) → _result'
+          '(if (if true then true else false) then false else true) → $result'
         );
         let states = definition.derive(formula);
         expect(states.size).toBe(1);
@@ -84,7 +84,7 @@ describe('definition', () => {
         );
         formula = evaluates(
           state.valueOf(formula.findVariable('result')),
-          parse('_result')
+          parse('$result')
         );
         states = definition.derive(formula);
         expect(states.size).toBe(1);
@@ -96,7 +96,7 @@ describe('definition', () => {
 
       test('', () => {
         let formula = parse(
-          '(if (if (if true then false else true) then true else false) then false else true) → _result'
+          '(if (if (if true then false else true) then true else false) then false else true) → $result'
         );
         let states = definition.derive(formula);
         expect(states.size).toBe(1);
@@ -106,7 +106,7 @@ describe('definition', () => {
         );
         formula = evaluates(
           state.valueOf(formula.findVariable('result')),
-          parse('_result')
+          parse('$result')
         );
         states = definition.derive(formula);
         expect(states.size).toBe(1);
@@ -116,7 +116,7 @@ describe('definition', () => {
         );
         formula = evaluates(
           state.valueOf(formula.findVariable('result')),
-          parse('_result')
+          parse('$result')
         );
         states = definition.derive(formula);
         expect(states.size).toBe(1);

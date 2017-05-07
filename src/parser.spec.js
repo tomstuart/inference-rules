@@ -45,7 +45,7 @@ describe('parsing', () => {
     });
 
     test('', () => {
-      expect(parse('(if true then _t₂ else _t₃) → _t₂', scope)).toEqual(
+      expect(parse('(if true then $t₂ else $t₃) → $t₂', scope)).toEqual(
         evaluates(
           conditional(yes, variable('t₂', scope), variable('t₃', scope)),
           variable('t₂', scope)
@@ -54,7 +54,7 @@ describe('parsing', () => {
     });
 
     test('', () => {
-      expect(parse('(if false then _t₂ else _t₃) → _t₃', scope)).toEqual(
+      expect(parse('(if false then $t₂ else $t₃) → $t₃', scope)).toEqual(
         evaluates(
           conditional(no, variable('t₂', scope), variable('t₃', scope)),
           variable('t₃', scope)
@@ -63,14 +63,14 @@ describe('parsing', () => {
     });
 
     test('', () => {
-      expect(parse('_t₁ → _t₁′', scope)).toEqual(
+      expect(parse('$t₁ → $t₁′', scope)).toEqual(
         evaluates(variable('t₁', scope), variable('t₁′', scope))
       );
     });
 
     test('', () => {
       expect(
-        parse('(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)', scope)
+        parse('(if $t₁ then $t₂ else $t₃) → (if $t₁′ then $t₂ else $t₃)', scope)
       ).toEqual(
         evaluates(
           conditional(

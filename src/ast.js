@@ -38,7 +38,7 @@ export default {
   Variable: class
     extends Record({ type: VARIABLE, name: undefined, scope: undefined }) {
     toString() {
-      return `_${this.name}`;
+      return `\$${this.name}`;
     }
 
     bracketed() {

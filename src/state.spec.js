@@ -11,7 +11,7 @@ describe('state', () => {
     let term, state;
 
     beforeEach(() => {
-      term = parse('_t₁');
+      term = parse('$t₁');
       state = unify(term, parse('true'));
     });
 
@@ -24,8 +24,8 @@ describe('state', () => {
     let term1, term2, state;
 
     beforeEach(() => {
-      term1 = parse('_t₁');
-      term2 = parse('_t₂');
+      term1 = parse('$t₁');
+      term2 = parse('$t₂');
       state = unify(term2, parse('false')).unify(term2, term1);
     });
 
@@ -38,9 +38,9 @@ describe('state', () => {
     let ifTrue, ifFalse, formula, state;
 
     beforeEach(() => {
-      ifTrue = parse('(if true then _t₂ else _t₃) → _t₂');
-      ifFalse = parse('(if false then _t₂ else _t₃) → _t₃');
-      formula = parse('(if true then false else true) → _result');
+      ifTrue = parse('(if true then $t₂ else $t₃) → $t₂');
+      ifFalse = parse('(if false then $t₂ else $t₃) → $t₃');
+      formula = parse('(if true then false else true) → $result');
     });
 
     describe('', () => {
@@ -78,9 +78,9 @@ describe('state', () => {
     let ifTrue, ifFalse, formula, state;
 
     beforeEach(() => {
-      ifTrue = parse('(if true then _t₂ else _t₃) → _t₂');
-      ifFalse = parse('(if false then _t₂ else _t₃) → _t₃');
-      formula = parse('(if false then false else true) → _result');
+      ifTrue = parse('(if true then $t₂ else $t₃) → $t₂');
+      ifFalse = parse('(if false then $t₂ else $t₃) → $t₃');
+      formula = parse('(if false then false else true) → $result');
     });
 
     describe('', () => {
