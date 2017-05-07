@@ -15,39 +15,39 @@ RSpec.describe do
     [
       rule([], 'true ∈ t'),
       rule([], 'false ∈ t'),
-      rule(['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'], '(if _t₁ then _t₂ else _t₃) ∈ t')
+      rule(['$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t'], '(if $t₁ then $t₂ else $t₃) ∈ t')
     ]
   }
 
   let(:boolean_semantics) {
     [
-      rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if true then _t₂ else _t₃) → _t₂'),
-      rule(['_t₂ ∈ t', '_t₃ ∈ t'], '(if false then _t₂ else _t₃) → _t₃'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'], '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)')
+      rule(['$t₂ ∈ t', '$t₃ ∈ t'], '(if true then $t₂ else $t₃) → $t₂'),
+      rule(['$t₂ ∈ t', '$t₃ ∈ t'], '(if false then $t₂ else $t₃) → $t₃'),
+      rule(['$t₁ → $t₁′', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$t₁′ ∈ t'], '(if $t₁ then $t₂ else $t₃) → (if $t₁′ then $t₂ else $t₃)')
     ]
   }
 
   let(:arithmetic_term_syntax) {
     [
       rule([], '0 ∈ t'),
-      rule(['_t₁ ∈ t'], '(succ _t₁) ∈ t'),
-      rule(['_t₁ ∈ t'], '(pred _t₁) ∈ t'),
-      rule(['_t₁ ∈ t'], '(iszero _t₁) ∈ t'),
+      rule(['$t₁ ∈ t'], '(succ $t₁) ∈ t'),
+      rule(['$t₁ ∈ t'], '(pred $t₁) ∈ t'),
+      rule(['$t₁ ∈ t'], '(iszero $t₁) ∈ t'),
 
       rule([], '0 ∈ nv'),
-      rule(['_nv₁ ∈ nv'], '(succ _nv₁) ∈ nv')
+      rule(['$nv₁ ∈ nv'], '(succ $nv₁) ∈ nv')
     ]
   }
 
   let(:arithmetic_semantics) {
     [
-      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(succ _t₁) → (succ _t₁′)'),
+      rule(['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'], '(succ $t₁) → (succ $t₁′)'),
       rule([], '(pred 0) → 0'),
-      rule(['_nv₁ ∈ nv'], '(pred (succ _nv₁)) → _nv₁'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(pred _t₁) → (pred _t₁′)'),
+      rule(['$nv₁ ∈ nv'], '(pred (succ $nv₁)) → $nv₁'),
+      rule(['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'], '(pred $t₁) → (pred $t₁′)'),
       rule([], '(iszero 0) → true'),
-      rule(['_nv₁ ∈ nv'], '(iszero (succ _nv₁)) → false'),
-      rule(['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'], '(iszero _t₁) → (iszero _t₁′)')
+      rule(['$nv₁ ∈ nv'], '(iszero (succ $nv₁)) → false'),
+      rule(['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'], '(iszero $t₁) → (iszero $t₁′)')
     ]
   }
 
@@ -60,7 +60,7 @@ RSpec.describe do
 
     describe 'matching' do
       specify do
-        formula = parse('(if false then false else true) → _result')
+        formula = parse('(if false then false else true) → $result')
         matches = definition.match_rules(formula)
         expect(matches.length).to eq 2
         match = matches.first
@@ -68,11 +68,11 @@ RSpec.describe do
       end
 
       specify do
-        formula = parse('(if (if true then true else false) then false else true) → _result')
+        formula = parse('(if (if true then true else false) then false else true) → $result')
         matches = definition.match_rules(formula)
         expect(matches.length).to eq 1
         match = matches.first
-        expect(match.state.value_of(formula.find_variable('result'))).to look_like 'if _t₁′ then false else true'
+        expect(match.state.value_of(formula.find_variable('result'))).to look_like 'if $t₁′ then false else true'
         expect(match.premises.length).to eq 5
         premise = match.premises.first
         matches = definition.match_rules(premise, match.state)
@@ -85,7 +85,7 @@ RSpec.describe do
 
     describe 'deriving' do
       specify do
-        formula = parse('(if false then false else true) → _result')
+        formula = parse('(if false then false else true) → $result')
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first
@@ -93,12 +93,12 @@ RSpec.describe do
       end
 
       specify do
-        formula = parse('(if (if true then true else false) then false else true) → _result')
+        formula = parse('(if (if true then true else false) then false else true) → $result')
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first
         expect(state.value_of(formula.find_variable('result'))).to look_like 'if true then false else true'
-        formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
+        formula = evaluates(state.value_of(formula.find_variable('result')), parse('$result'))
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first
@@ -106,17 +106,17 @@ RSpec.describe do
       end
 
       specify do
-        formula = parse('(if (if (if true then false else true) then true else false) then false else true) → _result')
+        formula = parse('(if (if (if true then false else true) then true else false) then false else true) → $result')
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first
         expect(state.value_of(formula.find_variable('result'))).to look_like 'if (if false then true else false) then false else true'
-        formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
+        formula = evaluates(state.value_of(formula.find_variable('result')), parse('$result'))
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first
         expect(state.value_of(formula.find_variable('result'))).to look_like 'if false then false else true'
-        formula = evaluates(state.value_of(formula.find_variable('result')), parse('_result'))
+        formula = evaluates(state.value_of(formula.find_variable('result')), parse('$result'))
         states = definition.derive(formula)
         expect(states.length).to eq 1
         state = states.first

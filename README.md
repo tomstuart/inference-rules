@@ -8,7 +8,7 @@ Programming Languages](https://www.cis.upenn.edu/~bcpierce/tapl/).
 The approach is to write the premises and conclusion of each inference rule in
 a simple, generic [metalanguage](https://en.wikipedia.org/wiki/Metalanguage):
 
-* anything that starts with an underscore is a metavariable;
+* anything that starts with a dollar sign is a metavariable;
 * anything in brackets is a nested expression; and
 * anything else is a (whitespace-delimited) keyword.
 
@@ -34,17 +34,17 @@ recursively building derivations of the resulting rules. The upshot is that you
 can write a bunch of rules describing some language and then apply those rules
 to some expression in that language to see if the derivation can assign values
 to any of its metavariables. If that expression is, for example, `(iszero (succ
-0)) → _t′`, the code could (given the right rules) build a derivation that
-assigns `false` to `_t′`.
+0)) → $t′`, the code could (given the right rules) build a derivation that
+assigns `false` to `$t′`.
 
 All of the above is wrapped up in a nice `Relation` class: you give it the name
 and rules of the relation, and then you can just ask it to apply the defined
 relation `once` (or `many` times) to a particular “input”. Concretely, that
 means that if you make a `Relation` called “`→`” and ask for it to be applied
 to the input `iszero (succ 0)`, it will build the expression `(iszero (succ 0))
-→ _output` for you, build a derivation of that expression using the inference
+→ $output` for you, build a derivation of that expression using the inference
 rules you provided, and then return the value that the derivation assigned to
-the `_output` metavariable.
+the `$output` metavariable.
 
 ## Example: small-step evaluation
 
@@ -56,23 +56,23 @@ $ irb -Ilib -rparser -rrelation
      { conclusion: 'true ∈ t' },
      { conclusion: 'false ∈ t' },
      {
-       premises: ['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'],
-       conclusion: '(if _t₁ then _t₂ else _t₃) ∈ t'
+       premises: ['$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t'],
+       conclusion: '(if $t₁ then $t₂ else $t₃) ∈ t'
      }
 => […]
 
 >> BOOLEAN_SEMANTICS =
      {
-       premises: ['_t₂ ∈ t', '_t₃ ∈ t'],
-       conclusion: '(if true then _t₂ else _t₃) → _t₂'
+       premises: ['$t₂ ∈ t', '$t₃ ∈ t'],
+       conclusion: '(if true then $t₂ else $t₃) → $t₂'
      },
      {
-       premises: ['_t₂ ∈ t', '_t₃ ∈ t'],
-       conclusion: '(if false then _t₂ else _t₃) → _t₃'
+       premises: ['$t₂ ∈ t', '$t₃ ∈ t'],
+       conclusion: '(if false then $t₂ else $t₃) → $t₃'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_t₁′ ∈ t'],
-       conclusion: '(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)'
+       premises: ['$t₁ → $t₁′', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$t₁′ ∈ t'],
+       conclusion: '(if $t₁ then $t₂ else $t₃) → (if $t₁′ then $t₂ else $t₃)'
      }
 => […]
 
@@ -107,36 +107,36 @@ $ irb -Ilib -rparser -rrelation
 
 >> ARITHMETIC_TERM_SYNTAX =
      { conclusion: '0 ∈ t' },
-     { premises: ['_t₁ ∈ t'], conclusion: '(succ _t₁) ∈ t' },
-     { premises: ['_t₁ ∈ t'], conclusion: '(pred _t₁) ∈ t' },
-     { premises: ['_t₁ ∈ t'], conclusion: '(iszero _t₁) ∈ t' },
+     { premises: ['$t₁ ∈ t'], conclusion: '(succ $t₁) ∈ t' },
+     { premises: ['$t₁ ∈ t'], conclusion: '(pred $t₁) ∈ t' },
+     { premises: ['$t₁ ∈ t'], conclusion: '(iszero $t₁) ∈ t' },
 
      { conclusion: '0 ∈ nv' },
-     { premises: ['_nv₁ ∈ nv'], conclusion: '(succ _nv₁) ∈ nv' }
+     { premises: ['$nv₁ ∈ nv'], conclusion: '(succ $nv₁) ∈ nv' }
 => […]
 
 >> ARITHMETIC_SEMANTICS =
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
-       conclusion: '(succ _t₁) → (succ _t₁′)'
+       premises: ['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'],
+       conclusion: '(succ $t₁) → (succ $t₁′)'
      },
      { conclusion: '(pred 0) → 0' },
      {
-       premises: ['_nv₁ ∈ nv'],
-       conclusion: '(pred (succ _nv₁)) → _nv₁'
+       premises: ['$nv₁ ∈ nv'],
+       conclusion: '(pred (succ $nv₁)) → $nv₁'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
-       conclusion: '(pred _t₁) → (pred _t₁′)'
+       premises: ['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'],
+       conclusion: '(pred $t₁) → (pred $t₁′)'
      },
      { conclusion: '(iszero 0) → true' },
      {
-       premises: ['_nv₁ ∈ nv'],
-       conclusion: '(iszero (succ _nv₁)) → false'
+       premises: ['$nv₁ ∈ nv'],
+       conclusion: '(iszero (succ $nv₁)) → false'
      },
      {
-       premises: ['_t₁ → _t₁′', '_t₁ ∈ t', '_t₁′ ∈ t'],
-       conclusion: '(iszero _t₁) → (iszero _t₁′)'
+       premises: ['$t₁ → $t₁′', '$t₁ ∈ t', '$t₁′ ∈ t'],
+       conclusion: '(iszero $t₁) → (iszero $t₁′)'
      }
 => […]
 
@@ -171,9 +171,9 @@ $ irb -Ilib -rparser -rrelation
 ```
 
 Note that the metalanguage places no implicit syntactic constraints on
-metavariables — as far as the system is concerned, a metavariable called `_nv₁`
+metavariables — as far as the system is concerned, a metavariable called `$nv₁`
 can have any value whatsoever as long as all premises are satisfied. In the
-above semantics, important syntactic constraints (`_t₁ ∈ t` and `_nv₁ ∈ nv`)
+above semantics, important syntactic constraints (`$t₁ ∈ t` and `$nv₁ ∈ nv`)
 are defined with extra inference rules and expressed explicitly with extra
 premises on the semantic rules.
 
@@ -192,8 +192,8 @@ define a typechecker instead of an evaluator just by writing different rules:
      { conclusion: 'true : Bool' },
      { conclusion: 'false : Bool' },
      {
-       premises: ['_t₁ : Bool', '_t₂ : _T', '_t₃ : _T', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_T ∈ T'],
-       conclusion: '(if _t₁ then _t₂ else _t₃) : _T'
+       premises: ['$t₁ : Bool', '$t₂ : $T', '$t₃ : $T', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$T ∈ T'],
+       conclusion: '(if $t₁ then $t₂ else $t₃) : $T'
      }
 => […]
 
@@ -226,16 +226,16 @@ define a typechecker instead of an evaluator just by writing different rules:
 >> ARITHMETIC_TYPE_RULES =
      { conclusion: '0 : Nat' },
      {
-       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-       conclusion: '(succ _t₁) : Nat'
+       premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+       conclusion: '(succ $t₁) : Nat'
      },
      {
-       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-       conclusion: '(pred _t₁) : Nat'
+       premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+       conclusion: '(pred $t₁) : Nat'
      },
      {
-       premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-       conclusion: '(iszero _t₁) : Bool'
+       premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+       conclusion: '(iszero $t₁) : Bool'
      }
 
 >> ARITHMETIC_TYPECHECKING =

@@ -8,8 +8,8 @@ RSpec.describe 'typechecking' do
     { conclusion: 'true ∈ t' },
     { conclusion: 'false ∈ t' },
     {
-      premises: ['_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t'],
-      conclusion: '(if _t₁ then _t₂ else _t₃) ∈ t'
+      premises: ['$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t'],
+      conclusion: '(if $t₁ then $t₂ else $t₃) ∈ t'
     }
   ]}
 
@@ -21,8 +21,8 @@ RSpec.describe 'typechecking' do
     { conclusion: 'true : Bool' },
     { conclusion: 'false : Bool' },
     {
-      premises: ['_t₁ : Bool', '_t₂ : _T', '_t₃ : _T', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_T ∈ T'],
-      conclusion: '(if _t₁ then _t₂ else _t₃) : _T'
+      premises: ['$t₁ : Bool', '$t₂ : $T', '$t₃ : $T', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$T ∈ T'],
+      conclusion: '(if $t₁ then $t₂ else $t₃) : $T'
     }
   ]}
 
@@ -59,12 +59,12 @@ RSpec.describe 'typechecking' do
 
   let(:arithmetic_term_syntax) {[
     { conclusion: '0 ∈ t' },
-    { premises: ['_t₁ ∈ t'], conclusion: '(succ _t₁) ∈ t' },
-    { premises: ['_t₁ ∈ t'], conclusion: '(pred _t₁) ∈ t' },
-    { premises: ['_t₁ ∈ t'], conclusion: '(iszero _t₁) ∈ t' },
+    { premises: ['$t₁ ∈ t'], conclusion: '(succ $t₁) ∈ t' },
+    { premises: ['$t₁ ∈ t'], conclusion: '(pred $t₁) ∈ t' },
+    { premises: ['$t₁ ∈ t'], conclusion: '(iszero $t₁) ∈ t' },
 
     { conclusion: '0 ∈ nv' },
-    { premises: ['_nv₁ ∈ nv'], conclusion: '(succ _nv₁) ∈ nv' }
+    { premises: ['$nv₁ ∈ nv'], conclusion: '(succ $nv₁) ∈ nv' }
   ]}
 
   let(:arithmetic_type_syntax) {[
@@ -74,16 +74,16 @@ RSpec.describe 'typechecking' do
   let(:arithmetic_type_rules) {[
     { conclusion: '0 : Nat' },
     {
-      premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-      conclusion: '(succ _t₁) : Nat'
+      premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+      conclusion: '(succ $t₁) : Nat'
     },
     {
-      premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-      conclusion: '(pred _t₁) : Nat'
+      premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+      conclusion: '(pred $t₁) : Nat'
     },
     {
-      premises: ['_t₁ : Nat', '_t₁ ∈ t'],
-      conclusion: '(iszero _t₁) : Bool'
+      premises: ['$t₁ : Nat', '$t₁ ∈ t'],
+      conclusion: '(iszero $t₁) : Bool'
     }
   ]}
 
@@ -129,67 +129,67 @@ RSpec.describe 'typechecking' do
     { conclusion: 'z ∈ x' },
 
     {
-      premises: ['_x ∈ x'],
-      conclusion: '_x ∈ t'
+      premises: ['$x ∈ x'],
+      conclusion: '$x ∈ t'
     },
     {
-      premises: ['_x ∈ x', '_T ∈ T', '_t ∈ t'],
-      conclusion: '(λ _x : _T . _t) ∈ t'
+      premises: ['$x ∈ x', '$T ∈ T', '$t ∈ t'],
+      conclusion: '(λ $x : $T . $t) ∈ t'
     },
     {
-      premises: ['_t₁ ∈ t', '_t₂ ∈ t'],
-      conclusion: '(_t₁ _t₂) ∈ t'
+      premises: ['$t₁ ∈ t', '$t₂ ∈ t'],
+      conclusion: '($t₁ $t₂) ∈ t'
     }
   ]}
 
   let(:lambda_calculus_type_syntax) {[
     {
-      premises: ['_T₁ ∈ T', '_T₂ ∈ T'],
-      conclusion: '(_T₁ → _T₂) ∈ T'
+      premises: ['$T₁ ∈ T', '$T₂ ∈ T'],
+      conclusion: '($T₁ → $T₂) ∈ T'
     }
   ]}
 
   let(:lambda_calculus_typing_context_rules) {[
     { conclusion: '∅ ∈ Г' },
     {
-      premises: ['_x ∈ x', '_T ∈ T', '_Г ∈ Г'],
-      conclusion: '(_x : _T , _Г) ∈ Г'
+      premises: ['$x ∈ x', '$T ∈ T', '$Г ∈ Г'],
+      conclusion: '($x : $T , $Г) ∈ Г'
     },
     {
-      premises: ['_x ∈ x', '_T ∈ T', '_Г ∈ Г'],
-      conclusion: '(_x : _T , _Г) assumes (_x : _T)'
+      premises: ['$x ∈ x', '$T ∈ T', '$Г ∈ Г'],
+      conclusion: '($x : $T , $Г) assumes ($x : $T)'
     },
     {
-      premises: ['_Г assumes (_x₂ : _T₂)', '_x₁ ∈ x', '_x₂ ∈ x', '_T₁ ∈ T', '_T₂ ∈ T', '_Г ∈ Г'],
-      conclusion: '(_x₁ : _T₁ , _Г) assumes (_x₂ : _T₂)'
+      premises: ['$Г assumes ($x₂ : $T₂)', '$x₁ ∈ x', '$x₂ ∈ x', '$T₁ ∈ T', '$T₂ ∈ T', '$Г ∈ Г'],
+      conclusion: '($x₁ : $T₁ , $Г) assumes ($x₂ : $T₂)'
     }
   ]}
 
   let(:lambda_calculus_type_rules) {[
     {
-      premises: ['_Г ∈ Г'],
-      conclusion: '_Г ⊢ true : Bool'
+      premises: ['$Г ∈ Г'],
+      conclusion: '$Г ⊢ true : Bool'
     },
     {
-      premises: ['_Г ∈ Г'],
-      conclusion: '_Г ⊢ false : Bool'
+      premises: ['$Г ∈ Г'],
+      conclusion: '$Г ⊢ false : Bool'
     },
     {
-      premises: ['_Г ⊢ _t₁ : Bool', '_Г ⊢ _t₂ : _T', '_Г ⊢ _t₃ : _T', '_Г ∈ Г', '_t₁ ∈ t', '_t₂ ∈ t', '_t₃ ∈ t', '_T ∈ T'],
-      conclusion: '_Г ⊢ (if _t₁ then _t₂ else _t₃) : _T'
+      premises: ['$Г ⊢ $t₁ : Bool', '$Г ⊢ $t₂ : $T', '$Г ⊢ $t₃ : $T', '$Г ∈ Г', '$t₁ ∈ t', '$t₂ ∈ t', '$t₃ ∈ t', '$T ∈ T'],
+      conclusion: '$Г ⊢ (if $t₁ then $t₂ else $t₃) : $T'
     },
 
     {
-      premises: ['_Г assumes (_x : _T)', '_x ∈ x', '_T ∈ T', '_Г ∈ Г'],
-      conclusion: '_Г ⊢ _x : _T'
+      premises: ['$Г assumes ($x : $T)', '$x ∈ x', '$T ∈ T', '$Г ∈ Г'],
+      conclusion: '$Г ⊢ $x : $T'
     },
     {
-      premises: ['(_x : _T₁ , _Г) ⊢ _t₂ : _T₂', '_Г ∈ Г', '_x ∈ x', '_T₁ ∈ T', '_t₂ ∈ t', '_T₂ ∈ T'],
-      conclusion: '_Г ⊢ (λ _x : _T₁ . _t₂) : (_T₁ → _T₂)'
+      premises: ['($x : $T₁ , $Г) ⊢ $t₂ : $T₂', '$Г ∈ Г', '$x ∈ x', '$T₁ ∈ T', '$t₂ ∈ t', '$T₂ ∈ T'],
+      conclusion: '$Г ⊢ (λ $x : $T₁ . $t₂) : ($T₁ → $T₂)'
     },
     {
-      premises: ['_Г ⊢ _t₁ : (_T₁₁ → _T₁₂)', '_Г ⊢ _t₂ : _T₁₁', '_Г ∈ Г', '_t₁ ∈ t', '_T₁₁ ∈ T', '_T₁₂ ∈ T', '_t₂ ∈ t'],
-      conclusion: '_Г ⊢ (_t₁ _t₂) : _T₁₂'
+      premises: ['$Г ⊢ $t₁ : ($T₁₁ → $T₁₂)', '$Г ⊢ $t₂ : $T₁₁', '$Г ∈ Г', '$t₁ ∈ t', '$T₁₁ ∈ T', '$T₁₂ ∈ T', '$t₂ ∈ t'],
+      conclusion: '$Г ⊢ ($t₁ $t₂) : $T₁₂'
     }
   ]}
 

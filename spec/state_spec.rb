@@ -12,24 +12,24 @@ RSpec.describe do
   end
 
   describe do
-    let(:term) { parse('_t₁') }
+    let(:term) { parse('$t₁') }
     let(:state) { unify(term, parse('true')) }
 
     specify { expect(state.value_of(term.find_variable('t₁'))).to look_like 'true' }
   end
 
   describe do
-    let(:term₁) { parse('_t₁') }
-    let(:term₂) { parse('_t₂') }
+    let(:term₁) { parse('$t₁') }
+    let(:term₂) { parse('$t₂') }
     let(:state) { unify(term₂, parse('false')).unify(term₂, term₁) }
 
     specify { expect(state.value_of(term₁.find_variable('t₁'))).to look_like 'false' }
   end
 
   describe do
-    let(:if_true) { parse('(if true then _t₂ else _t₃) → _t₂') }
-    let(:if_false) { parse('(if false then _t₂ else _t₃) → _t₃') }
-    let(:formula) { parse('(if true then false else true) → _result') }
+    let(:if_true) { parse('(if true then $t₂ else $t₃) → $t₂') }
+    let(:if_false) { parse('(if false then $t₂ else $t₃) → $t₃') }
+    let(:formula) { parse('(if true then false else true) → $result') }
 
     describe do
       let(:state) { unify(formula, if_true) }
@@ -47,9 +47,9 @@ RSpec.describe do
   end
 
   describe do
-    let(:if_true) { parse('(if true then _t₂ else _t₃) → _t₂') }
-    let(:if_false) { parse('(if false then _t₂ else _t₃) → _t₃') }
-    let(:formula) { parse('(if false then false else true) → _result') }
+    let(:if_true) { parse('(if true then $t₂ else $t₃) → $t₂') }
+    let(:if_false) { parse('(if false then $t₂ else $t₃) → $t₃') }
+    let(:formula) { parse('(if false then false else true) → $result') }
 
     describe do
       let(:state) { unify(formula, if_true) }

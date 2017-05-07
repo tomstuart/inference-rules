@@ -5,7 +5,7 @@ module AST
     include Expression
 
     def to_s
-      "_#{name}"
+      "$#{name}"
     end
 
     def find_variable(name)

@@ -34,9 +34,9 @@ RSpec.describe do
   describe 'with variables' do
     let(:scope) { double }
 
-    specify { expect(parse('(if true then _t₂ else _t₃) → _t₂', scope)).to eq evaluates(conditional(yes, variable('t₂', scope), variable('t₃', scope)), variable('t₂', scope)) }
-    specify { expect(parse('(if false then _t₂ else _t₃) → _t₃', scope)).to eq evaluates(conditional(no, variable('t₂', scope), variable('t₃', scope)), variable('t₃', scope)) }
-    specify { expect(parse('_t₁ → _t₁′', scope)).to eq evaluates(variable('t₁', scope), variable('t₁′', scope)) }
-    specify { expect(parse('(if _t₁ then _t₂ else _t₃) → (if _t₁′ then _t₂ else _t₃)', scope)).to eq evaluates(conditional(variable('t₁', scope), variable('t₂', scope), variable('t₃', scope)), conditional(variable('t₁′', scope), variable('t₂', scope), variable('t₃', scope))) }
+    specify { expect(parse('(if true then $t₂ else $t₃) → $t₂', scope)).to eq evaluates(conditional(yes, variable('t₂', scope), variable('t₃', scope)), variable('t₂', scope)) }
+    specify { expect(parse('(if false then $t₂ else $t₃) → $t₃', scope)).to eq evaluates(conditional(no, variable('t₂', scope), variable('t₃', scope)), variable('t₃', scope)) }
+    specify { expect(parse('$t₁ → $t₁′', scope)).to eq evaluates(variable('t₁', scope), variable('t₁′', scope)) }
+    specify { expect(parse('(if $t₁ then $t₂ else $t₃) → (if $t₁′ then $t₂ else $t₃)', scope)).to eq evaluates(conditional(variable('t₁', scope), variable('t₂', scope), variable('t₃', scope)), conditional(variable('t₁′', scope), variable('t₂', scope), variable('t₃', scope))) }
   end
 end

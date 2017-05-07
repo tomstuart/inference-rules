@@ -44,7 +44,7 @@ class Parser
   def parse_expression
     if can_read? %r{\(}
       parse_brackets
-    elsif can_read? %r{_}
+    elsif can_read? %r{\$}
       parse_variable
     elsif can_read? %r{[^\p{Blank}()]+}
       parse_keyword
@@ -62,7 +62,7 @@ class Parser
   end
 
   def parse_variable
-    read %r{_}
+    read %r{\$}
     builder.build_variable(read_name)
   end
 
