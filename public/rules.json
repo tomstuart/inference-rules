@@ -1,0 +1,123 @@
+[
+  { "conclusion": "true ∈ t" },
+  { "conclusion": "false ∈ t" },
+  {
+    "premises": ["$t₁ ∈ t", "$t₂ ∈ t", "$t₃ ∈ t"],
+    "conclusion": "(if $t₁ then $t₂ else $t₃) ∈ t"
+  },
+
+  { "conclusion": "Bool ∈ T" },
+
+  { "conclusion": "true : Bool" },
+  { "conclusion": "false : Bool" },
+  {
+    "premises": [
+      "$t₁ : Bool",
+      "$t₂ : $T",
+      "$t₃ : $T",
+      "$t₁ ∈ t",
+      "$t₂ ∈ t",
+      "$t₃ ∈ t",
+      "$T ∈ T"
+    ],
+    "conclusion": "(if $t₁ then $t₂ else $t₃) : $T"
+  },
+
+  { "conclusion": "a ∈ x" },
+  { "conclusion": "b ∈ x" },
+  { "conclusion": "c ∈ x" },
+  { "conclusion": "d ∈ x" },
+  { "conclusion": "e ∈ x" },
+  { "conclusion": "f ∈ x" },
+  { "conclusion": "g ∈ x" },
+  { "conclusion": "x ∈ x" },
+  { "conclusion": "y ∈ x" },
+  { "conclusion": "z ∈ x" },
+  {
+    "premises": ["$x ∈ x"],
+    "conclusion": "$x ∈ t"
+  },
+  {
+    "premises": ["$x ∈ x", "$T ∈ T", "$t ∈ t"],
+    "conclusion": "(λ $x : $T . $t) ∈ t"
+  },
+  {
+    "premises": ["$t₁ ∈ t", "$t₂ ∈ t"],
+    "conclusion": "($t₁ $t₂) ∈ t"
+  },
+
+  {
+    "premises": ["$T₁ ∈ T", "$T₂ ∈ T"],
+    "conclusion": "($T₁ → $T₂) ∈ T"
+  },
+
+  { "conclusion": "∅ ∈ Г" },
+  {
+    "premises": ["$x ∈ x", "$T ∈ T", "$Г ∈ Г"],
+    "conclusion": "($x : $T , $Г) ∈ Г"
+  },
+  {
+    "premises": ["$x ∈ x", "$T ∈ T", "$Г ∈ Г"],
+    "conclusion": "($x : $T , $Г) assumes ($x : $T)"
+  },
+  {
+    "premises": [
+      "$Г assumes ($x₂ : $T₂)",
+      "$x₁ ∈ x",
+      "$x₂ ∈ x",
+      "$T₁ ∈ T",
+      "$T₂ ∈ T",
+      "$Г ∈ Г"
+    ],
+    "conclusion": "($x₁ : $T₁ , $Г) assumes ($x₂ : $T₂)"
+  },
+
+  {
+    "premises": ["$Г ∈ Г"],
+    "conclusion": "$Г ⊢ true : Bool"
+  },
+  {
+    "premises": ["$Г ∈ Г"],
+    "conclusion": "$Г ⊢ false : Bool"
+  },
+  {
+    "premises": [
+      "$Г ⊢ $t₁ : Bool",
+      "$Г ⊢ $t₂ : $T",
+      "$Г ⊢ $t₃ : $T",
+      "$Г ∈ Г",
+      "$t₁ ∈ t",
+      "$t₂ ∈ t",
+      "$t₃ ∈ t",
+      "$T ∈ T"
+    ],
+    "conclusion": "$Г ⊢ (if $t₁ then $t₂ else $t₃) : $T"
+  },
+  {
+    "premises": ["$Г assumes ($x : $T)", "$x ∈ x", "$T ∈ T", "$Г ∈ Г"],
+    "conclusion": "$Г ⊢ $x : $T"
+  },
+  {
+    "premises": [
+      "($x : $T₁ , $Г) ⊢ $t₂ : $T₂",
+      "$Г ∈ Г",
+      "$x ∈ x",
+      "$T₁ ∈ T",
+      "$t₂ ∈ t",
+      "$T₂ ∈ T"
+    ],
+    "conclusion": "$Г ⊢ (λ $x : $T₁ . $t₂) : ($T₁ → $T₂)"
+  },
+  {
+    "premises": [
+      "$Г ⊢ $t₁ : ($T₁₁ → $T₁₂)",
+      "$Г ⊢ $t₂ : $T₁₁",
+      "$Г ∈ Г",
+      "$t₁ ∈ t",
+      "$T₁₁ ∈ T",
+      "$T₁₂ ∈ T",
+      "$t₂ ∈ t"
+    ],
+    "conclusion": "$Г ⊢ ($t₁ $t₂) : $T₁₂"
+  }
+]
