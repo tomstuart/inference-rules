@@ -1,5 +1,7 @@
 # Inference rules
 
+![](https://github.com/tomstuart/inference-rules/workflows/Ruby/badge.svg)
+
 This is an attempt at an implementation of [inference
 rules](https://en.wikipedia.org/wiki/Rule_of_inference), specifically for the
 purpose of being able to evaluate the languages in Chapter 3 of [Types and
